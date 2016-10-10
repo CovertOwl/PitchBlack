@@ -13,4 +13,4 @@ end)
 --Called once per in-game tick
 script.on_event(defines.events.on_tick, function(event)
 	Main.On_Tick(event)
-end
+end)
