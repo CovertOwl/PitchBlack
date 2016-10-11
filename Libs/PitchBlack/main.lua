@@ -14,15 +14,13 @@ DefaultGlobalData = {
 		--Elapsed days for the cycle
 		Day = 0,
 		--Elapsed seconds for the day
-		Second = 0,
-		--Elapsed ticks for the second
-		Tick = 0,
-
-		--Values that will be used to alter the game state
-		GameStateModifiers =
-		{
-			Brightness = 0
-		}
+		Second = 0
+	},
+	
+	Config = 
+	{
+		--Number of real seconds in a game day, 10 minutes
+		DayLength = 600
 	},
 	
 	--Some meta
@@ -30,26 +28,31 @@ DefaultGlobalData = {
 	title = 'Hello World',
 	modVersion = '0.0.3',
 	
+	--Total elapsed ticks
+	ElapsedTicks = 0,
+	
 	--Current & Previous DefaultGlobalData.DefaultState
 	PreviousState = nil,
-	CurrentState = nil,
-	
-	--Number of real seconds in a game day, 10 minutes
-	DayLength = 600
+	CurrentState = nil
 }
 
 Main = 
 {
 	On_Tick = function(self)
-		--Transition simple state
-		global.Data.PreviousState = DeepCopy(global.Data.CurrentState)
-		global.Data.CurrentState = DeepCopy(DefaultGlobalData.DefaultState)
+		global.Data.ElapsedTicks = global.Data.ElapsedTicks + 1
+	
+		if global.Data.ElapsedTicks >= 60 then
+			global.Data.ElapsedTicks = 0
 		
-		--Update mod
-		Time.Tick(deltaSeconds, lobal.Data.CurrentState, global.Data.PreviousState)
-		Biters.Tick(deltaSeconds, lobal.Data.CurrentState, global.Data.PreviousState)
-		
-		--Commit update to game state
+			--Transition simple state
+			global.Data.PreviousState = DeepCopy(global.Data.CurrentState)
+			
+			--Update mod
+			Time.Tick(global.Data.CurrentState, global.Data.PreviousState, global.Data.Config)
+			Biters.Tick(global.Data.CurrentState, global.Data.PreviousState, global.Data.Config)
+			
+			--Commit update to game state
+		end
 	end,
 
 	On_Configuration_Changed = function(self, data)
@@ -75,6 +78,10 @@ Main =
 			logDebug('Current global data already exists! -  "' .. global.Data.name 
 						.. 'v' .. global.Data.version .. '".')
 		end
+		
+		--Init other modules
+		Time.Init(global.Data.CurrentState, global.Data.Config)
+		Biters.Init(global.Data.CurrentState, global.Data.Config)
 	end,
 	
 	--Init a new global data
