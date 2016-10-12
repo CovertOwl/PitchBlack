@@ -99,7 +99,14 @@ end
 
 pbLogger = Logger.new("PB", "main", true)
 function LogDebug(msg)
-	pbLogger.log(msg)
+	LogMessage('<Debug> ' .. msg)
 end
 
+function LogInfo(msg)
+	LogMessage('<Info> ' .. msg)
+end
+
+function LogMessage(msg)	
+	pbLogger.log('<GT-' .. game.tick .. ', ET-' .. global.Data.TotalElapsedTicks .. '> ' .. msg)
+end
 

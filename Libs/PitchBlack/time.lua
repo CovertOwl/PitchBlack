@@ -1,210 +1,459 @@
 require 'Libs/Utility/logger'
+require 'Libs/Utility/math'
+require 'Libs/Utility/generic'
 
 --PHASE or TIME PHASE =  (day, dusk, night etc)
 
-Time = 
-{
-	--The default state of time
-	DefaultState = 
-	{		
-		--The index of the current phase of time
-		PhaseIndex = 0,
+Time = {}
+
+--The default state of time
+Time.DefaultState = 
+{	
+	--Meta information
+	Name = 'TimeState_v1',
+
+	--How long the phase will last, in game days
+	PhaseDuration = 0,
 	
-		--How long the phase will last, in game days
-		PhaseDuration = 0,
-		
-		--How long the phase has left until it finishes, in game days
-		PhaseRemainingDuration = 0,
-		
-		--The current copy of the time phase data
-		PhaseConfig = nil,
-		
-		--The phase config variable data index
-		PhaseVarDataIndex = 0,
-		
-		--Whether the current phase is considered daytime (true), otherwise night (false)
-		IsDay = false,
-		
-		--If this is not a transition phase (day, night) this is the brightness for the phase
-		Brightness = 0,
-		
-		--If this is a transition phase (dawn, dusk) these are the brightness values to lerp between
-		--Brightness at the start of the phase
-		StartBrightness = 0,
-		--Brightness at the end of the phase
-		EndBrightness = 0,
-	}
+	--How long the phase has left until it finishes, in game days
+	PhaseRemainingDuration = 0,
 	
-	--Cycle config for day
-	DayPhaseConfig = 
-	{
-		--Is this phase considered day?
-		IsDay = true,
-		
-		--Is this a transition phase?
-		IsTransition = false,
-		
-		--Message(s) that appear for all players
-		Warnings = {}
+	--The current copy of the time phase data
+	CurrentPhaseConfig = nil,
 	
-		--Data that has conditions that need to be met to be valid, such as cycles complete
-		VariableData = 
-		{
-			{CyclesComplete = 0, MinLength = 17, MaxLength = 17, MinBrightness = 1, MaxBrightness = 1},
-			{CyclesComplete = 1, MinLength = 15, MaxLength = 17, MinBrightness = 1, MaxBrightness = 1},
-			{CyclesComplete = 4, MinLength = 14, MaxLength = 18, MinBrightness = 1, MaxBrightness = 1}
-		}
-	},
+	--The phase config variable data
+	CurrentPhaseVarData = nil,
 	
-	--Cycle config for dusk
-	DuskPhaseConfig = 
-	{
-		--Is this phase considered day?
-		IsDay = true,
-		
-		--Is this a transition phase?
-		IsTransition = true,
-		
-		--Message(s) that appear for all players
-		Warnings = {'The sun is beggining to set!'}
+	--Whether the current phase is considered daytime (true), otherwise night (false)
+	IsDay = false,
 	
-		--Data that has conditions that need to be met to be valid, such as cycles complete
-		VariableData = 
-		{
-			{CyclesComplete = 0, MinLength = 1, MaxLength = 1}
-		}
-	},
+	--The current brightness
+	Brightness = 0,
 	
-	--Cycle config for night
-	NightPhaseConfig = 
-	{
-		--Is this phase considered day?
-		IsDay = false,
-		
-		--Is this a transition phase?
-		IsTransition = false,
-		
-		--Message(s) that appear for all players
-		Warnings = {'Night has begun!'}
+	--If this is a transition phase (dawn, dusk) these are the brightness values to lerp between
+	--Brightness at the start of the phase
+	StartBrightness = 0,
+	--Brightness at the end of the phase
+	EndBrightness = 0,
 	
-		--Data that has conditions that need to be met to be valid, such as cycles complete
-		VariableData = 
-		{
-			{CyclesComplete = 0, MinLength = 2, MaxLength = 2, MinBrightness = 0.3, MaxBrightness = 0.3},
-			{CyclesComplete = 1, MinLength = 3, MaxLength = 3, MinBrightness = 0.2, MaxBrightness = 0.3},
-			{CyclesComplete = 2, MinLength = 4, MaxLength = 4, MinBrightness = 0.1, MaxBrightness = 0.2},
-			{CyclesComplete = 3, MinLength = 4, MaxLength = 5, MinBrightness = 0.0, MaxBrightness = 0.2},
-			{CyclesComplete = 4, MinLength = 4, MaxLength = 6, MinBrightness = 0.0, MaxBrightness = 0.2},
-			{CyclesComplete = 5, MinLength = 4, MaxLength = 7, MinBrightness = 0.0, MaxBrightness = 0.2}
-		}
-	},
-	
-	--Cycle config for dawn
-	DawnPhaseConfig = 
-	{
-		--Is this phase considered day?
-		IsDay = true,
-		
-		--Is this a transition phase?
-		IsTransition = true,
-		
-		--Message(s) that appear for all players
-		Warnings = {'The sun is rising!'}
-	
-		--Data that has conditions that need to be met to be valid, such as cycles complete
-		VariableData = 
-		{
-			{CyclesComplete = 0, MinLength = 1, MaxLength = 1}
-		}
-	},
-		
-	DayPhaseIndex = 1,
-	DuskPhaseIndex = 2,
-	NightPhaseIndex = 3,
-	DawnPhaseIndex = 4,
-		
-	--CyclesComplete = 0,
-	----Total number of days completed
-	--TotalDays = 0,
-	--
-	----Elapsed days for the cycle
-	--Day = 0,
-	----Elapsed seconds for the day
-	--Second = 0
-	
-	prev state?
-	--Called when the mod changes/is added for first time
-	Init = function(self, globalState, config)
-		if globalState.TimeState == nil then
-			globalState.TimeState = DeepCopy(Time.DefaultState)
-			StartDay(globalState, config)
-		end
-	end
-	
-	rename currentstate and previousState
-	
-	This is what happens when you need to do a commit on the train before you enter the tunnel on the way to work
-	
-	--Called on every phase after it begins
-	InitPhase = function(self, currentState, previousState, config)	
-		local currentTimeState = currentState.TimeState
-		
-		TimeState.PhaseVarDataIndex = Self.GetPhaseVariableDataIndex(currentState, Time.DayPhaseConfig, config)
-		
-		local phaseVarData = TimeState.PhaseConfig.VariableData[TimeState.PhaseVarDataIndex]
-		
-		currentTimeState.IsDay = phaseVarData.IsDay
-		local minPhaseDuration = phaseVarData.MinLength
-		local maxPhaseDuration = phaseVarData.MaxLength
-		
-		currentTimeState.PhaseDuration = math.random(minPhaseDuration, maxPhaseDuration)
-		currentTimeState.PhaseRemainingDuration = currentTimeState.PhaseDuration
-		
-		if currentTimeState.IsTransition == true then
-			currentTimeState.StartBrightness = previousState.TimeState.Brightness
-		end
-	end
-	
-	GetPhaseVariableDataIndex = function(self, globalState, phase, config)
-		local variableDataIndex = 0		
-		
-		for index, phaseVariableDataIter in ipairs(phase.VariableData) do
-			if phaseVariableDataIter.CyclesComplete <= globalState.CyclesComplete then
-				variableDataIndex = index
-				break
-			end
-		end
-		
-		return variableDataIndex
-	end	
-	
-	StartDay = function(self, currentState, previousState, config)
-		local timeState = currentState.TimeState
-		timeState.PhaseIndex = Time.DayPhaseIndex
-		timeState.PhaseConfig = Time.DayPhaseConfig
-		
-		Self.InitPhase(currentState, previousState, Time.DayPhaseConfig, config)
-	end
-	
-	--Called each mod tick (every 1 sec)
-	Tick = function(self, currentState, previousState, config)
-		if currentState.Second + 1 > config.DayLength then
-			self.TransitionDay(currentState, previousState, config)
-		else
-			currentState.Second = currentState.Second + 1
-		end
-		
-		
-	end
-	
-	TransitionDay = function(self, currentState, previousState, config)
-		currentState.Second = 0
-		currentState.TotalDays = currentState.TotalDays + 1
-	
-		if currentState.Day + 1 > currentState.Time.
-			--self.TransitionDay(currentState, previousState, config)
-		else
-			currentState.Day = currentState.Day + 1
-		end
-	end
+	--When a transition phase begins (dusk, dawn) the next non-transition phase is determined
+	--The next phase config after the transition
+	NextNonTransitionPhaseConfig = nil,
+	--The next phase var data after the transition
+	NextNonTransitionPhaseVarData = nil
 }
+
+--Used to identify which phase is active
+Time.DayPhaseIndex = 1
+Time.DuskPhaseIndex = 2
+Time.NightPhaseIndex = 3
+Time.DawnPhaseIndex = 4
+
+--Cycle config for day
+Time.DayPhaseConfig = 
+{
+	--Some meta information
+	Name = 'Day_v1',
+	Title = 'Day',
+
+	--The index of this phase
+	PhaseIndex = Time.DayPhaseIndex,
+
+	--Is this phase considered day?
+	IsDay = true,
+	
+	--Is this a transition phase?
+	IsTransition = false,
+	
+	--Message(s) that appear for all players
+	Warnings = nil,
+
+	--Data that has conditions that need to be met to be valid, such as cycles complete
+	VariableData = 
+	{
+		{Name = "Day_v1_1", CyclesComplete = 0, MinLength = 17, MaxLength = 17, MinBrightness = 1, MaxBrightness = 1},
+		{Name = "Day_v1_2", CyclesComplete = 1, MinLength = 15, MaxLength = 17, MinBrightness = 1, MaxBrightness = 1},
+		{Name = "Day_v1_3", CyclesComplete = 4, MinLength = 14, MaxLength = 18, MinBrightness = 1, MaxBrightness = 1}
+	}
+}
+
+--Cycle config for dusk
+Time.DuskPhaseConfig = 
+{
+	--Some meta information
+	Name = 'Dusk_v1',
+	Title = 'Dusk',
+	
+	--The index of this phase
+	PhaseIndex = Time.DuskPhaseIndex,
+	
+	--Is this phase considered day?
+	IsDay = true,
+	
+	--Is this a transition phase?
+	IsTransition = true,
+	
+	--Message(s) that appear for all players
+	Warnings = {'The sun is beggining to set!'},
+
+	--Data that has conditions that need to be met to be valid, such as cycles complete
+	VariableData = 
+	{
+		{Name = "Dusk_v1_1", CyclesComplete = 0, MinLength = 1, MaxLength = 1}
+	}
+}
+
+--Cycle config for night
+Time.NightPhaseConfig = 
+{
+	--Some meta information
+	Name = 'Night_v1',
+	Title = 'Night',
+	
+	--The index of this phase
+	PhaseIndex = Time.NightPhaseIndex,
+	
+	--Is this phase considered day?
+	IsDay = false,
+	
+	--Is this a transition phase?
+	IsTransition = false,
+	
+	--Message(s) that appear for all players
+	Warnings = {'Night has begun!'},
+
+	--Data that has conditions that need to be met to be valid, such as cycles complete
+	VariableData = 
+	{
+		{Name = "Night_v1_1", CyclesComplete = 0, MinLength = 2, MaxLength = 2, MinBrightness = 0.3, MaxBrightness = 0.3},
+		{Name = "Night_v1_2", CyclesComplete = 1, MinLength = 3, MaxLength = 3, MinBrightness = 0.2, MaxBrightness = 0.3},
+		{Name = "Night_v1_3", CyclesComplete = 2, MinLength = 4, MaxLength = 4, MinBrightness = 0.1, MaxBrightness = 0.2},
+		{Name = "Night_v1_4", CyclesComplete = 3, MinLength = 4, MaxLength = 5, MinBrightness = 0.0, MaxBrightness = 0.2},
+		{Name = "Night_v1_5", CyclesComplete = 4, MinLength = 4, MaxLength = 6, MinBrightness = 0.0, MaxBrightness = 0.2},
+		{Name = "Night_v1_6", CyclesComplete = 5, MinLength = 4, MaxLength = 7, MinBrightness = 0.0, MaxBrightness = 0.2}
+	}
+}
+
+--Cycle config for dawn
+Time.DawnPhaseConfig = 
+{
+	--Some meta information
+	Name = 'Dawn_v1',
+	Title = 'Dawn',
+	
+	--The index of this phase
+	PhaseIndex = Time.DawnPhaseIndex,
+	
+	--Is this phase considered day?
+	IsDay = true,
+	
+	--Is this a transition phase?
+	IsTransition = true,
+	
+	--Message(s) that appear for all players
+	Warnings = {'The sun is rising!'},
+
+	--Data that has conditions that need to be met to be valid, such as cycles complete
+	VariableData = 
+	{
+		{Name = "Dawn_v1_1", CyclesComplete = 0, MinLength = 1, MaxLength = 1}
+	}
+}
+	
+--Called when the mod changes/is added for first time
+function Time.Init(self, globalState, config)
+	LogDebug('Time.Init()')
+	
+	if globalState.CycleState == nil then
+		LogDebug('Cycle state does not exist! Starting a new one...')
+	
+		globalState.CycleState = DeepCopy(Time.DefaultState)
+		self:StartDay(globalState, nil, config)
+	end
+	
+	LogInfo('Starting with Time - ' .. globalState.CycleState.Name)
+	
+	LogDebug('Exit Time.Init()')
+end
+
+--Called on every phase as it begins
+function Time.InitPhase(self, currentGlobalState, previousGlobalState, config)
+	LogDebug('Time.InitPhase()')	
+	
+	local currentCycleState = currentGlobalState.CycleState
+	local currentPhaseConfig = currentCycleState.CurrentPhaseConfig
+	local currentPhaseVarData = currentCycleState.CurrentPhaseVarData
+	
+	--Update state whether is day
+	currentCycleState.IsDay = currentPhaseVarData.IsDay
+	
+	--Update state durations
+	local minPhaseDuration = currentPhaseVarData.MinLength
+	local maxPhaseDuration = currentPhaseVarData.MaxLength		
+	currentCycleState.PhaseDuration = math.random(minPhaseDuration, maxPhaseDuration)
+	currentCycleState.PhaseRemainingDuration = currentCycleState.PhaseDuration
+	
+	LogDebug('Phase Duration set: ' .. currentCycleState.PhaseDuration)
+	
+	--Update state brightness
+	if currentPhaseConfig.IsTransition == false then
+		LogDebug('Is not transition phase.')
+	
+		local minBrightness = currentPhaseVarData.MinBrightness
+		local maxBrightness = currentPhaseVarData.MaxBrightness
+		
+		currentCycleState.Brightness = math.random(minBrightness, maxBrightness)
+		
+		LogDebug('Phase Brightness set: ' .. currentCycleState.Brightness)
+	else
+		LogDebug('Is transition phase.')
+	
+		--Determine transition-to cycle
+		currentCycleState.NextNonTransitionPhaseConfig = self:GetNextNonTransitionPhaseConfig(currentGlobalState, config)
+		currentCycleState.NextNonTransitionPhaseVarData = self:GetPhaseVariableData(currentGlobalState, currentCycleState.NextNonTransitionPhaseConfig, config)
+		
+		--Set transition brightness, which is last phase brightness to next phase brightness
+		local minBrightness = currentCycleState.NextNonTransitionPhaseConfig.MinBrightness
+		local maxBrightness = currentCycleState.NextNonTransitionPhaseConfig.MaxBrightness			
+		currentCycleState.StartBrightness = previousGlobalState.CycleState.Brightness
+		currentCycleState.EndBrightness = math.random(minBrightness, maxBrightness)
+		
+		LogDebug('Phase Start & End Brightness set: ' .. currentCycleState.StartBrightness .. ', ' .. currentCycleState.EndBrightness)
+	end
+	
+	--Message all warnings for beginning of phase
+	if currentPhaseConfig.Warnings ~= nil then
+		MessageAll(currentCycleState.CurrentPhaseConfig.Warnings[1])
+	end
+	
+	LogInfo('Starting phase: ' .. currentPhaseConfig.Name)
+	
+	LogDebug('Exit Time.InitPhase()')
+end
+
+--Given a state, get the variable data
+function Time.GetPhaseVariableData(self, globalState, phase, config)
+	LogDebug('Time.GetPhaseVariableData(' .. phase.Name .. ')')
+	
+	local variableData = nil	
+	
+	for index, phaseVariableDataIter in ipairs(phase.VariableData) do
+		if phaseVariableDataIter.CyclesComplete <= globalState.CyclesComplete then
+			variableData = phaseVariableDataIter
+			break
+		end
+	end
+	
+	LogDebug('Exit Time.GetPhaseVariableData(' .. phase.Name .. ') with ' .. variableData.Name)
+	return variableData
+end
+
+--Given a state, get the variable data
+function Time.GetNextNonTransitionPhaseConfig(self, globalState, config)
+	LogDebug('Time.GetNextNonTransitionPhaseConfig()')
+
+	local cycleState = globalState.CycleState
+	
+	--If day or dusk
+	if globalState.PhaseIndex == Time.DayPhaseIndex or globalState.PhaseIndex == Time.DuskPhaseIndex then
+		LogDebug('Exit Time.GetNextNonTransitionPhaseConfig() with ' .. Time.NightPhaseConfig.Name)
+		return Time.NightPhaseConfig
+	--If night or dawn
+	else
+		LogDebug('Exit Time.GetNextNonTransitionPhaseConfig() with ' .. Time.DayPhaseConfig.Name)
+		return Time.DayPhaseConfig
+	end
+end
+	
+--Start phase day in the current global state
+function Time.StartDay(self, currentGlobalState, previousGlobalState, config)
+	LogDebug('Time.StartDay()')
+
+	local currentCycleState = currentGlobalState.CycleState
+	local previousCycleState = nil
+	
+	if previousGlobalState ~= nil then
+		previousGlobalState = previousGlobalState.CycleState
+	end
+	
+	--If transitioned from
+	if 
+		previousCycleState ~= nil and
+		previousCycleState.NextNonTransitionPhaseConfig ~= nil and
+		previousCycleState.NextNonTransitionPhaseVarData ~= nil 
+	then		
+		currentCycleState.CurrentPhaseConfig = previousCycleState.NextNonTransitionPhaseConfig
+		currentCycleState.CurrentPhaseVarData = previousCycleState.NextNonTransitionPhaseVarData
+		
+		LogDebug('Start day with previously select phase & data: ' .. currentCycleState.CurrentPhaseConfig.Name .. ', ' .. currentCycleState.CurrentPhaseVarData.Name)
+	--This should only occur during init
+	else
+		currentCycleState.CurrentPhaseConfig = Time.DayPhaseConfig
+		currentCycleState.CurrentPhaseVarData = self:GetPhaseVariableData(currentGlobalState, currentCycleState.CurrentPhaseConfig, config)
+		
+		LogDebug('Start day with new phase & data: ' .. currentCycleState.CurrentPhaseConfig.Name .. ', ' .. currentCycleState.CurrentPhaseVarData.Name)
+	end
+	
+	self:InitPhase(currentGlobalState, previousGlobalState, config)
+	
+	LogDebug('Exit Time.StartDay()')
+end
+
+--Start phase dusk in the current global state
+function Time.StartDusk(self, currentGlobalState, previousGlobalState, config)
+	LogDebug('Time.StartDusk()')
+	
+	local cycleState = currentGlobalState.CycleState
+	cycleState.PhaseIndex = Time.DuskPhaseIndex
+	cycleState.CurrentPhaseConfig = Time.DuskPhaseConfig
+	
+	LogDebug('Start dusk with new phase & data: ' .. currentCycleState.CurrentPhaseConfig.Name .. ', ' .. currentCycleState.CurrentPhaseVarData.Name)
+	
+	self:InitPhase(currentGlobalState, previousGlobalState, config)
+	
+	LogDebug('Exit Time.StartDusk()')
+end
+
+--Start phase dawn in the current global state
+function Time.StartDawn(self, currentGlobalState, previousGlobalState, config)
+	LogDebug('Time.StartDawn()')
+	
+	local cycleState = currentGlobalState.CycleState
+	cycleState.PhaseIndex = Time.DawnPhaseIndex
+	cycleState.CurrentPhaseConfig = Time.DawnPhaseConfig
+	
+	LogDebug('Start dawn with new phase & data: ' .. currentCycleState.CurrentPhaseConfig.Name .. ', ' .. currentCycleState.CurrentPhaseVarData.Name)
+	
+	self:InitPhase(currentGlobalState, previousGlobalState, config)
+	
+	LogDebug('Exit Time.StartDawn()')
+end
+
+--Start phase night in the current global state
+function Time.StartNight(self, currentGlobalState, previousGlobalState, config)
+	LogDebug('Time.StartNight()')
+	
+	local currentCycleState = currentGlobalState.CycleState
+	local previousCycleState = previousGlobalState.CycleState		
+	
+	--If transitioned from
+	if 
+		previousCycleState ~= nil and
+		previousCycleState.NextNonTransitionPhaseConfig ~= nil and
+		previousCycleState.NextNonTransitionPhaseVarData ~= nil 
+	then		
+		currentCycleState.CurrentPhaseConfig = previousCycleState.NextNonTransitionPhaseConfig
+		currentCycleState.CurrentPhaseVarData = previousCycleState.NextNonTransitionPhaseVarData
+		
+		LogDebug('Start night with previously select phase & data: ' .. currentCycleState.CurrentPhaseConfig.Name .. ', ' .. previousCycleState.NextNonTransitionPhaseVarData.Name)
+	--This should only occur during init
+	else
+		currentCycleState.CurrentPhaseConfig = Time.NightPhaseConfig
+		currentCycleState.CurrentPhaseVarData = self:GetPhaseVariableData(currentGlobalState, currentCycleState.CurrentPhaseConfig, config)
+		
+		LogDebug('Start night with new phase & data: ' .. currentCycleState.CurrentPhaseConfig.Name .. ', ' .. currentCycleState.CurrentPhaseVarData.Name)
+	end
+	
+	self:InitPhase(currentGlobalState, previousGlobalState, config)
+	
+	LogDebug('Exit Time.StartNight()')
+end
+
+--Called each mod tick (every 1 sec)
+function Time.Tick(self, currentGlobalState, previousGlobalState, config)
+	LogDebug('Time.Tick()')
+	self:TransitionSecond(currentGlobalState, previousGlobalState, config)
+	
+	local currentCycleState = currentGlobalState.CycleState
+	local previousCycleState = previousGlobalState.CycleState
+	
+	--If a transitioning phase, update brightness based on remaining duration
+	if currentCycleState.CurrentPhaseConfig.IsTransition == true then
+		local scaleBrightness = currentCycleState.PhaseRemainingDuration / currentCycleState.PhaseDuration
+		
+		currentCycleState.Brightness = Math.Lerp(currentCycleState.StartBrightness, currentCycleState.EndBrightness, scaleBrightness)
+	end
+	
+	--Update game brightness if there is a difference
+	if currentCycleState.Brightness ~= previousCycleState.Brightness then
+		LogDebug('Set Brightness: ' .. currentCycleState.Brightness)
+	
+		SetBrightness(currentCycleState.Brightness)
+	end
+	
+	LogDebug('Exit Time.Tick()')
+end
+
+--Called at the end of a second
+function Time.TransitionSecond(self, currentGlobalState, previousGlobalState, config)
+	LogDebug('Time.TransitionSecond()')
+	
+	currentGlobalState.Second = currentGlobalState.Second + 1
+
+	if currentGlobalState.Second >= config.DayLength then
+		self:TransitionDay(currentGlobalState, previousGlobalState, config)
+	end
+	
+	LogDebug('Exit Time.TransitionSecond()')
+end
+
+--Called when the current day finishes
+function Time.TransitionDay(self, currentGlobalState, previousGlobalState, config)
+	LogDebug('Time.TransitionDay()')
+	
+	--Update global state
+	currentGlobalState.Second = 0
+	currentGlobalState.TotalDays = currentGlobalState.TotalDays + 1
+	currentGlobalState.Day = currentGlobalState.Day + 1
+	
+	--Update cycle phase
+	local currentCycleState = currentGlobalState.CycleState
+	currentCycleState.PhaseRemainingDuration = currentCycleState.PhaseRemainingDuration - 1
+
+	--Transition cycle phase
+	if currentCycleState.PhaseRemainingDuration <= 0 then		
+		LogDebug('Phase time expired.')
+	
+		self:TransitionPhase(currentGlobalState, previousGlobalState, config)
+	end
+	
+	LogDebug('Exit Time.TransitionDay()')
+end
+
+--Called when the current phase finishes
+function Time.TransitionPhase(self, currentGlobalState, previousGlobalState, config)
+	LogDebug('Time.TransitionPhase()')
+	
+	local previousPhaseConfig = previousGlobalState.CycleState.CurrentPhaseConfig
+	
+	--If Day
+	if previousPhaseConfig.PhaseIndex == Time.DayPhaseIndex then
+		self:StartDusk(currentGlobalState, previousGlobalState, config)
+	--If Dusk
+	elseif previousPhaseConfig.PhaseIndex == Time.DuskPhaseIndex then
+		self:StartNight(currentGlobalState, previousGlobalState, config)
+	--If Night
+	elseif previousPhaseConfig.PhaseIndex == Time.NightPhaseIndex then
+		self:StartDawn(currentGlobalState, previousGlobalState, config)
+	--If Dawn
+	else
+		self:TransitionCycle(currentGlobalState, previousGlobalState, config)
+	end
+	
+	LogDebug('Exit Time.TransitionPhase()')
+end
+
+--Called when the current cycle finishes
+function Time.TransitionCycle(self, currentGlobalState, previousGlobalState, config)
+	LogDebug('Time.TransitionCycle()')
+	
+	LogInfo('Cycle Complete')
+	
+	currentGlobalState.CyclesComplete = currentGlobalState.CyclesComplete + 1
+	
+	currentGlobalState.Day = 0
+		
+	StartDay(currentGlobalState, previousGlobalState, config)
+	
+	LogDebug('Exit Time.TransitionCycle()')
+end
