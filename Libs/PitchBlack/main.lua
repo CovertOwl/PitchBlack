@@ -21,7 +21,7 @@ DefaultGlobalData = {
 	Config = 
 	{
 		--Number of real seconds in a game day, 10 minutes
-		DayLength = 2
+		DayLength = 10
 	},
 	
 	--Some meta
@@ -71,7 +71,7 @@ function Main.On_Init(self)
 end
 
 --Run on first load of mod or when version changes
-function Main.InitWorld(self)	
+function Main.InitWorld(self)
 	game.map_settings.pollution.ageing = 0.75
 	game.surfaces[1].freeze_daytime(true)
 

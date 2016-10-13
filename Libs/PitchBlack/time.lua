@@ -15,8 +15,8 @@ Time.DefaultState =
 	--How long the phase will last, in game days
 	PhaseDuration = 0,
 	
-	--How long the phase has left until it finishes, in game days
-	PhaseRemainingDuration = 0,
+	--How many days in phase have passed
+	PhaseDaysComplete = 0,
 	
 	--The current copy of the time phase data
 	CurrentPhaseConfig = nil,
@@ -28,7 +28,7 @@ Time.DefaultState =
 	IsDay = false,
 	
 	--The current brightness
-	Brightness = 0,
+	Brightness = nil,
 	
 	--If this is a transition phase (dawn, dusk) these are the brightness values to lerp between
 	--Brightness at the start of the phase
@@ -71,7 +71,7 @@ Time.DayPhaseConfig =
 	--Data that has conditions that need to be met to be valid, such as cycles complete
 	VariableData = 
 	{
-		{Name = "Day_v1_1", CyclesComplete = 0, MinLength = 17, MaxLength = 17, MinBrightness = 1, MaxBrightness = 1},
+		{Name = "Day_v1_1", CyclesComplete = 0, MinLength = 1, MaxLength = 1, MinBrightness = 1, MaxBrightness = 1},
 		{Name = "Day_v1_2", CyclesComplete = 1, MinLength = 15, MaxLength = 17, MinBrightness = 1, MaxBrightness = 1},
 		{Name = "Day_v1_3", CyclesComplete = 4, MinLength = 14, MaxLength = 18, MinBrightness = 1, MaxBrightness = 1}
 	}
@@ -191,7 +191,7 @@ function Time.InitPhase(self, currentGlobalState, previousGlobalState, config)
 	local minPhaseDuration = currentPhaseVarData.MinLength
 	local maxPhaseDuration = currentPhaseVarData.MaxLength		
 	currentCycleState.PhaseDuration = math.random(minPhaseDuration, maxPhaseDuration)
-	currentCycleState.PhaseRemainingDuration = currentCycleState.PhaseDuration
+	currentCycleState.PhaseDaysComplete = 0
 	
 	LogDebug('Phase Duration set: ' .. currentCycleState.PhaseDuration)
 	
@@ -199,12 +199,14 @@ function Time.InitPhase(self, currentGlobalState, previousGlobalState, config)
 	if currentPhaseConfig.IsTransition == false then
 		LogDebug('Is not transition phase.')
 	
-		local minBrightness = currentPhaseVarData.MinBrightness
-		local maxBrightness = currentPhaseVarData.MaxBrightness
+		if currentCycleState.Brightness  == nil then
+			local minBrightness = currentPhaseVarData.MinBrightness
+			local maxBrightness = currentPhaseVarData.MaxBrightness
+			
+			currentCycleState.Brightness = Math.RandomFloat(minBrightness, maxBrightness)
 		
-		currentCycleState.Brightness = math.random(minBrightness, maxBrightness)
-		
-		LogDebug('Phase Brightness set: ' .. currentCycleState.Brightness)
+			LogDebug('Phase Brightness set: ' .. currentCycleState.Brightness)
+		end
 	else
 		LogDebug('Is transition phase.')
 	
@@ -213,10 +215,10 @@ function Time.InitPhase(self, currentGlobalState, previousGlobalState, config)
 		currentCycleState.NextNonTransitionPhaseVarData = self:GetPhaseVariableData(currentGlobalState, currentCycleState.NextNonTransitionPhaseConfig, config)
 		
 		--Set transition brightness, which is last phase brightness to next phase brightness
-		local minBrightness = currentCycleState.NextNonTransitionPhaseConfig.MinBrightness
-		local maxBrightness = currentCycleState.NextNonTransitionPhaseConfig.MaxBrightness			
+		local minBrightness = currentCycleState.NextNonTransitionPhaseVarData.MinBrightness
+		local maxBrightness = currentCycleState.NextNonTransitionPhaseVarData.MaxBrightness			
 		currentCycleState.StartBrightness = previousGlobalState.CycleState.Brightness
-		currentCycleState.EndBrightness = math.random(minBrightness, maxBrightness)
+		currentCycleState.EndBrightness = Math.RandomFloat(minBrightness, maxBrightness)
 		
 		LogDebug('Phase Start & End Brightness set: ' .. currentCycleState.StartBrightness .. ', ' .. currentCycleState.EndBrightness)
 	end
@@ -235,27 +237,28 @@ end
 function Time.GetPhaseVariableData(self, globalState, phase, config)
 	LogDebug('Time.GetPhaseVariableData(' .. phase.Name .. ')')
 	
-	local variableData = nil	
+	local lastVariableData = nil	
 	
-	for index, phaseVariableDataIter in ipairs(phase.VariableData) do
-		if phaseVariableDataIter.CyclesComplete <= globalState.CyclesComplete then
-			variableData = phaseVariableDataIter
+	for index, phaseVariableDataIter in ipairs(phase.VariableData) do	
+		if globalState.CyclesComplete < phaseVariableDataIter.CyclesComplete then
 			break
 		end
+		
+		lastVariableData = phaseVariableDataIter
 	end
 	
-	LogDebug('Exit Time.GetPhaseVariableData(' .. phase.Name .. ') with ' .. variableData.Name)
-	return variableData
+	LogDebug('Exit Time.GetPhaseVariableData(' .. phase.Name .. ') with ' .. lastVariableData.Name)
+	return lastVariableData
 end
 
 --Given a state, get the variable data
 function Time.GetNextNonTransitionPhaseConfig(self, globalState, config)
 	LogDebug('Time.GetNextNonTransitionPhaseConfig()')
 
-	local cycleState = globalState.CycleState
+	local phaseConfig = globalState.CycleState.CurrentPhaseConfig
 	
 	--If day or dusk
-	if globalState.PhaseIndex == Time.DayPhaseIndex or globalState.PhaseIndex == Time.DuskPhaseIndex then
+	if phaseConfig.PhaseIndex == Time.DayPhaseIndex or phaseConfig.PhaseIndex == Time.DuskPhaseIndex then
 		LogDebug('Exit Time.GetNextNonTransitionPhaseConfig() with ' .. Time.NightPhaseConfig.Name)
 		return Time.NightPhaseConfig
 	--If night or dawn
@@ -273,7 +276,7 @@ function Time.StartDay(self, currentGlobalState, previousGlobalState, config)
 	local previousCycleState = nil
 	
 	if previousGlobalState ~= nil then
-		previousGlobalState = previousGlobalState.CycleState
+		previousCycleState = previousGlobalState.CycleState
 	end
 	
 	--If transitioned from
@@ -304,10 +307,10 @@ function Time.StartDusk(self, currentGlobalState, previousGlobalState, config)
 	LogDebug('Time.StartDusk()')
 	
 	local cycleState = currentGlobalState.CycleState
-	cycleState.PhaseIndex = Time.DuskPhaseIndex
 	cycleState.CurrentPhaseConfig = Time.DuskPhaseConfig
+	cycleState.CurrentPhaseVarData = self:GetPhaseVariableData(currentGlobalState, cycleState.CurrentPhaseConfig, config)
 	
-	LogDebug('Start dusk with new phase & data: ' .. currentCycleState.CurrentPhaseConfig.Name .. ', ' .. currentCycleState.CurrentPhaseVarData.Name)
+	LogDebug('Start dusk with new phase & data: ' .. cycleState.CurrentPhaseConfig.Name .. ', ' .. cycleState.CurrentPhaseVarData.Name)
 	
 	self:InitPhase(currentGlobalState, previousGlobalState, config)
 	
@@ -319,10 +322,10 @@ function Time.StartDawn(self, currentGlobalState, previousGlobalState, config)
 	LogDebug('Time.StartDawn()')
 	
 	local cycleState = currentGlobalState.CycleState
-	cycleState.PhaseIndex = Time.DawnPhaseIndex
 	cycleState.CurrentPhaseConfig = Time.DawnPhaseConfig
+	cycleState.CurrentPhaseVarData = self:GetPhaseVariableData(currentGlobalState, cycleState.CurrentPhaseConfig, config)
 	
-	LogDebug('Start dawn with new phase & data: ' .. currentCycleState.CurrentPhaseConfig.Name .. ', ' .. currentCycleState.CurrentPhaseVarData.Name)
+	LogDebug('Start dawn with new phase & data: ' .. cycleState.CurrentPhaseConfig.Name .. ', ' .. cycleState.CurrentPhaseVarData.Name)
 	
 	self:InitPhase(currentGlobalState, previousGlobalState, config)
 	
@@ -334,7 +337,11 @@ function Time.StartNight(self, currentGlobalState, previousGlobalState, config)
 	LogDebug('Time.StartNight()')
 	
 	local currentCycleState = currentGlobalState.CycleState
-	local previousCycleState = previousGlobalState.CycleState		
+	local previousCycleState = nil
+	
+	if previousGlobalState ~= nil then
+		previousCycleState = previousGlobalState.CycleState
+	end
 	
 	--If transitioned from
 	if 
@@ -362,14 +369,18 @@ end
 --Called each mod tick (every 1 sec)
 function Time.Tick(self, currentGlobalState, previousGlobalState, config)
 	LogDebug('Time.Tick()')
+	
+	LogDebug('CyclesComplete: ' .. currentGlobalState.CyclesComplete .. ', Total Days: ' .. currentGlobalState.TotalDays .. ', Day: ' .. currentGlobalState.Day .. ', Second: ' .. currentGlobalState.Second)
+	
 	self:TransitionSecond(currentGlobalState, previousGlobalState, config)
 	
 	local currentCycleState = currentGlobalState.CycleState
 	local previousCycleState = previousGlobalState.CycleState
 	
 	--If a transitioning phase, update brightness based on remaining duration
-	if currentCycleState.CurrentPhaseConfig.IsTransition == true then
-		local scaleBrightness = currentCycleState.PhaseRemainingDuration / currentCycleState.PhaseDuration
+	if currentCycleState.CurrentPhaseConfig.IsTransition == true then	
+		local scaleBrightness = (currentGlobalState.Second + currentCycleState.PhaseDaysComplete * config.DayLength) / (currentCycleState.PhaseDuration * config.DayLength)
+		LogDebug('Scale Brightness: ' .. scaleBrightness)
 		
 		currentCycleState.Brightness = Math.Lerp(currentCycleState.StartBrightness, currentCycleState.EndBrightness, scaleBrightness)
 	end
@@ -408,10 +419,10 @@ function Time.TransitionDay(self, currentGlobalState, previousGlobalState, confi
 	
 	--Update cycle phase
 	local currentCycleState = currentGlobalState.CycleState
-	currentCycleState.PhaseRemainingDuration = currentCycleState.PhaseRemainingDuration - 1
+	currentCycleState.PhaseDaysComplete = currentCycleState.PhaseDaysComplete + 1
 
 	--Transition cycle phase
-	if currentCycleState.PhaseRemainingDuration <= 0 then		
+	if currentCycleState.PhaseDaysComplete >= currentCycleState.PhaseDuration then		
 		LogDebug('Phase time expired.')
 	
 		self:TransitionPhase(currentGlobalState, previousGlobalState, config)
@@ -453,7 +464,7 @@ function Time.TransitionCycle(self, currentGlobalState, previousGlobalState, con
 	
 	currentGlobalState.Day = 0
 		
-	StartDay(currentGlobalState, previousGlobalState, config)
+	self:StartDay(currentGlobalState, previousGlobalState, config)
 	
 	LogDebug('Exit Time.TransitionCycle()')
 end
