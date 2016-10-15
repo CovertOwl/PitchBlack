@@ -1,6 +1,6 @@
 require 'Libs/Utility/generic'
 require 'Libs/Utility/logger'
---require 'Libs/PitchBlack/biters'
+require 'Libs/PitchBlack/biters'
 require 'Libs/PitchBlack/time'
 
 --Global data table to be used when a new cycle begins or when no cycle exists
@@ -21,7 +21,7 @@ DefaultGlobalData = {
 	Config = 
 	{
 		--Number of real seconds in a game day, 10 minutes
-		DayLength = 10
+		DayLength = 600
 	},
 	
 	--Some meta
@@ -55,7 +55,7 @@ function Main.On_Tick(self)
 		
 		--Update mod
 		Time:Tick(global.Data.CurrentState, global.Data.PreviousState, global.Data.Config)
-		--Biters:Tick(global.Data.CurrentState, global.Data.PreviousState, global.Data.Config)
+		Biters:Tick(global.Data.CurrentState, global.Data.PreviousState, global.Data.Config)
 		
 		--Commit update to game state
 		LogDebug('End Main Tick')
@@ -84,11 +84,18 @@ function Main.InitWorld(self)
 	else
 		LogDebug('Current global data already exists! -  "' .. global.Data.Name 
 					.. 'v' .. global.Data.Version .. '".')
+	end	
+	
+	--If old mod exists
+	if global.CurrentCycle ~= nil then
+		LogInfo('Removing old mod: ' .. global.CurrentCycle.name)
+	
+		global.CurrentCycle = nil
 	end
 	
 	--Init other modules
 	Time:Init(global.Data.CurrentState, global.Data.Config)
-	--Biters:Init(global.Data.CurrentState, global.Data.Config)
+	Biters:Init(global.Data.CurrentState, global.Data.Config)
 	
 	LogDebug('Main.InitWorld()')
 end

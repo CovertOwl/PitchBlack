@@ -1,4 +1,5 @@
 require 'Libs/Utility/logger'
+require 'Libs/Utility/generic'
 
 Biters = {}
 
@@ -22,7 +23,7 @@ Biters.DefaultState =
 	--Remove %2 temporary evolution per minute that accumulated over night (multiplied by brightness)
 	TempNightEvolutionDissapateRate = -0.00033,
 	
-	PhaseState = 
+	CurrentPhaseState = 
 	{
 		--The current biter phase data
 		CurrentPhase = nil,		
@@ -34,10 +35,10 @@ Biters.DefaultState =
 		--How much time the phase is due to last
 		TotalDurationSeconds = 0,
 		--Evolution % at the beginning of this phase			
-		EvolutionStart = 0
-	},
-	
-	CurrentPhaseState = nil
+		EvolutionStart = 0,
+		
+		Messages = nil
+	}
 }
 
 Biters.Phases = 
@@ -48,7 +49,7 @@ Biters.Phases =
 		Title = 'Night Craze',
 		
 		--Text message(s) displayed when swapping to this phase
-		StartWarnings = {'The biters having begun swarming the landscape!'},
+		StartWarnings = {'The biters have begun swarming the landscape!'},
 		--Hint message
 		HintWarnings = {'Hitting them now will reduce their strength.', 'However, pollution output is agitating them greatly!'},
 		--Text message(s) displayed when repeating this phase
@@ -62,8 +63,8 @@ Biters.Phases =
 				Title = " (Medium Activity)",
 				
 				--Condition for whether this variation is used, if cycles completed between this range it is valid
-				MinCyclesComplete = -1.0, 
-				MaxCyclesComplete = 3,
+				Cond_MinCyclesComplete = -1.0, 
+				Cond_MaxCyclesComplete = 3,
 				Cond_ReqCycleComplete = true,
 				
 				--Condition for whether this variation is used, if evolution between this range it is valid
@@ -72,8 +73,8 @@ Biters.Phases =
 				Cond_ReqEvolution = false,
 				
 				--Condition for whether this variation is used, if brightness between this range it is valid
-				MinBrightness = -1.0,
-				MaxBrightness = -1.0,
+				Cond_MinBrightness = -1.0,
+				Cond_MaxBrightness = -1.0,
 				Cond_ReqBrightness = false,
 				
 				--Minimum amount of seconds that need to pass for this phase to expire, 8min
@@ -100,7 +101,7 @@ Biters.Phases =
 				
 				--Phase expiry condition, if brightness falls out of this range the phase will end
 				MinBrightnessBreak = -1.0,
-				MaxBrightnessBreak = 0.3,
+				MaxBrightnessBreak = 0.4,
 				
 				--Weighted chance for this phase to occur during the day time
 				DayChanceWeight = 0,
@@ -157,18 +158,18 @@ Biters.Phases =
 				Title = " (High Activity)",
 				
 				--Condition for whether this variation is used, if cycles completed between this range it is valid
-				MinCyclesComplete = 1, 
-				MaxCyclesComplete = -1,
+				Cond_MinCyclesComplete = 1, 
+				Cond_MaxCyclesComplete = -1,
 				Cond_ReqCycleComplete = false,
 				
 				--Condition for whether this variation is used, if evolution between this range it is valid
-				MinEvolution = 0.2,
-				MaxEvolution = -1.0,
+				Cond_MinEvolution = 0.2,
+				Cond_MaxEvolution = -1.0,
 				Cond_ReqEvolution = false,
 				
 				--Condition for whether this variation is used, if brightness between this range it is valid
-				MinBrightness = -1.0,
-				MaxBrightness = -1.0,
+				Cond_MinBrightness = -1.0,
+				Cond_MaxBrightness = -1.0,
 				Cond_ReqBrightness = false,
 				
 				--Minimum amount of seconds that need to pass for this phase to expire, 8min
@@ -195,7 +196,7 @@ Biters.Phases =
 				
 				--Phase expiry condition, if brightness falls out of this range the phase will end
 				MinBrightnessBreak = -1,
-				MaxBrightnessBreak = 0.3,
+				MaxBrightnessBreak = 0.4,
 				
 				--Weighted chance for this phase to occur during the day time
 				DayChanceWeight = 0,
@@ -252,18 +253,18 @@ Biters.Phases =
 				Title = " (Very High Activity)",
 				
 				--Condition for whether this variation is used, if cycles completed between this range it is valid
-				MinCyclesComplete = 2, 
-				MaxCyclesComplete = -1,
+				Cond_MinCyclesComplete = 2, 
+				Cond_MaxCyclesComplete = -1,
 				Cond_ReqCycleComplete = false,
 				
 				--Condition for whether this variation is used, if evolution between this range it is valid
-				MinEvolution = 0.4,
-				MaxEvolution = -1.0,
+				Cond_MinEvolution = 0.4,
+				Cond_MaxEvolution = -1.0,
 				Cond_ReqEvolution = false,
 				
 				--Condition for whether this variation is used, if brightness between this range it is valid
-				MinBrightness = -1.0,
-				MaxBrightness = -1.0,
+				Cond_MinBrightness = -1.0,
+				Cond_MaxBrightness = -1.0,
 				Cond_ReqBrightness = false,
 				
 				--Minimum amount of seconds that need to pass for this phase to expire, 8min
@@ -290,7 +291,7 @@ Biters.Phases =
 				
 				--Phase expiry condition, if brightness falls out of this range the phase will end
 				MinBrightnessBreak = -1,
-				MaxBrightnessBreak = 0.2,
+				MaxBrightnessBreak = 0.4,
 				
 				--Weighted chance for this phase to occur during the day time
 				DayChanceWeight = 0,
@@ -349,7 +350,7 @@ Biters.Phases =
 		Title = 'Night Growth',
 		
 		--Text message(s) displayed when swapping to this phase
-		StartWarnings = {'The biter swarm is swelling as the mass around their nests.'},
+		StartWarnings = {'The biter swarm is swelling as they mass around their nests.'},
 		--Hint message
 		HintWarnings = {'Avoid attacking their nests or you risk provoking a stronger response.', 'Pollution output is agitating them greatly!'},
 		--Text message(s) displayed when repeating this phase
@@ -363,18 +364,18 @@ Biters.Phases =
 				Title = " (Medium Activity)",
 				
 				--Condition for whether this variation is used, if cycles completed between this range it is valid
-				MinCyclesComplete = -1.0, 
-				MaxCyclesComplete = -1.0,
+				Cond_MinCyclesComplete = -1.0, 
+				Cond_MaxCyclesComplete = -1.0,
 				Cond_ReqCycleComplete = false,
 				
 				--Condition for whether this variation is used, if evolution between this range it is valid
-				MinEvolution = -1.0,
-				MaxEvolution = 0.3,
+				Cond_MinEvolution = -1.0,
+				Cond_MaxEvolution = 0.3,
 				Cond_ReqEvolution = false,
 				
 				--Condition for whether this variation is used, if brightness between this range it is valid
-				MinBrightness = -1.0,
-				MaxBrightness = -1.0,
+				Cond_MinBrightness = -1.0,
+				Cond_MaxBrightness = -1.0,
 				Cond_ReqBrightness = false,
 				
 				--Minimum amount of seconds that need to pass for this phase to expire, 8min
@@ -401,7 +402,7 @@ Biters.Phases =
 				
 				--Phase expiry condition, if brightness falls out of this range the phase will end
 				MinBrightnessBreak = -1.0,
-				MaxBrightnessBreak = 0.3,
+				MaxBrightnessBreak = 0.4,
 				
 				--Weighted chance for this phase to occur during the day time
 				DayChanceWeight = 0,
@@ -458,18 +459,18 @@ Biters.Phases =
 				Title = " (High Activity)",
 				
 				--Condition for whether this variation is used, if cycles completed between this range it is valid
-				MinCyclesComplete = 1, 
-				MaxCyclesComplete = -1,
-				Cond_ReqCycleComplete = true,
+				Cond_MinCyclesComplete = 1, 
+				Cond_MaxCyclesComplete = -1,
+				Cond_ReqCycleComplete = false,
 				
 				--Condition for whether this variation is used, if evolution between this range it is valid
-				MinEvolution = 0.2,
-				MaxEvolution = -1.0,
-				Cond_ReqEvolution = true,
+				Cond_MinEvolution = 0.2,
+				Cond_MaxEvolution = -1.0,
+				Cond_ReqEvolution = false,
 				
 				--Condition for whether this variation is used, if brightness between this range it is valid
-				MinBrightness = -1.0,
-				MaxBrightness = -1.0,
+				Cond_MinBrightness = -1.0,
+				Cond_MaxBrightness = -1.0,
 				Cond_ReqBrightness = false,
 				
 				--Minimum amount of seconds that need to pass for this phase to expire, 10min
@@ -496,7 +497,7 @@ Biters.Phases =
 				
 				--Phase expiry condition, if brightness falls out of this range the phase will end
 				MinBrightnessBreak = -1,
-				MaxBrightnessBreak = 0.25,
+				MaxBrightnessBreak = 0.4,
 				
 				--Weighted chance for this phase to occur during the day time
 				DayChanceWeight = 0,
@@ -569,18 +570,18 @@ Biters.Phases =
 				Title = " (High Activity)",
 				
 				--Condition for whether this variation is used, if cycles completed between this range it is valid
-				MinCyclesComplete = 1, 
-				MaxCyclesComplete = -1.0,
+				Cond_MinCyclesComplete = 1, 
+				Cond_MaxCyclesComplete = -1.0,
 				Cond_ReqCycleComplete = true,
 				
 				--Condition for whether this variation is used, if evolution between this range it is valid
-				MinEvolution = 0.2,
-				MaxEvolution = 0.4,
+				Cond_MinEvolution = 0.2,
+				Cond_MaxEvolution = 0.4,
 				Cond_ReqEvolution = true,
 				
 				--Condition for whether this variation is used, if brightness between this range it is valid
-				MinBrightness = -1,
-				MaxBrightness = -1,
+				Cond_MinBrightness = -1,
+				Cond_MaxBrightness = -1,
 				Cond_ReqBrightness = false,
 				
 				--Minimum amount of seconds that need to pass for this phase to expire, 4min
@@ -607,7 +608,7 @@ Biters.Phases =
 				
 				--Phase expiry condition, if brightness falls out of this range the phase will end
 				MinBrightnessBreak = -1,
-				MaxBrightnessBreak = 0.2,
+				MaxBrightnessBreak = 0.4,
 				
 				--Weighted chance for this phase to occur during the day time
 				DayChanceWeight = 0,
@@ -664,18 +665,18 @@ Biters.Phases =
 				Title = " (Very High Activity)",
 				
 				--Condition for whether this variation is used, if cycles completed between this range it is valid
-				MinCyclesComplete = 2, 
-				MaxCyclesComplete = -1.0,
+				Cond_MinCyclesComplete = 2, 
+				Cond_MaxCyclesComplete = -1.0,
 				Cond_ReqCycleComplete = true,
 				
 				--Condition for whether this variation is used, if evolution between this range it is valid
-				MinEvolution = 0.4,
-				MaxEvolution = -1,
+				Cond_MinEvolution = 0.4,
+				Cond_MaxEvolution = -1,
 				Cond_ReqEvolution = true,
 				
 				--Condition for whether this variation is used, if brightness between this range it is valid
-				MinBrightness = -1,
-				MaxBrightness = -1.0,
+				Cond_MinBrightness = -1,
+				Cond_MaxBrightness = -1.0,
 				Cond_ReqBrightness = false,
 				
 				--Minimum amount of seconds that need to pass for this phase to expire, 5min
@@ -702,7 +703,7 @@ Biters.Phases =
 				
 				--Phase expiry condition, if brightness falls out of this range the phase will end
 				MinBrightnessBreak = -1,
-				MaxBrightnessBreak = 0.2,
+				MaxBrightnessBreak = 0.4,
 				
 				--Weighted chance for this phase to occur during the day time
 				DayChanceWeight = 0,
@@ -775,18 +776,18 @@ Biters.Phases =
 				Title = " (Low Activity)",
 				
 				--Condition for whether this variation is used, if cycles completed between this range it is valid
-				MinCyclesComplete = -1.0, 
-				MaxCyclesComplete = -1.0,
+				Cond_MinCyclesComplete = -1.0, 
+				Cond_MaxCyclesComplete = -1.0,
 				Cond_ReqCycleComplete = false,
 				
 				--Condition for whether this variation is used, if evolution between this range it is valid
-				MinEvolution = -1.0,
-				MaxEvolution = -1.0,
+				Cond_MinEvolution = -1.0,
+				Cond_MaxEvolution = -1.0,
 				Cond_ReqEvolution = false,
 				
 				--Condition for whether this variation is used, if brightness between this range it is valid
-				MinBrightness = -1.0,
-				MaxBrightness = -1.0,
+				Cond_MinBrightness = -1.0,
+				Cond_MaxBrightness = -1.0,
 				Cond_ReqBrightness = false,
 				
 				--Minimum amount of seconds that need to pass for this phase to expire, 4min
@@ -886,18 +887,18 @@ Biters.Phases =
 				Title = " (Very Low Activity)",
 				
 				--Condition for whether this variation is used, if cycles completed between this range it is valid
-				MinCyclesComplete = -1.0, 
-				MaxCyclesComplete = -1.0,
+				Cond_MinCyclesComplete = -1.0, 
+				Cond_MaxCyclesComplete = -1.0,
 				Cond_ReqCycleComplete = false,
 				
 				--Condition for whether this variation is used, if evolution between this range it is valid
-				MinEvolution = -1.0,
-				MaxEvolution = 0.25,
+				Cond_MinEvolution = -1.0,
+				Cond_MaxEvolution = 0.25,
 				Cond_ReqEvolution = true,
 				
 				--Condition for whether this variation is used, if brightness between this range it is valid
-				MinBrightness = -1.0,
-				MaxBrightness = -1.0,
+				Cond_MinBrightness = -1.0,
+				Cond_MaxBrightness = -1.0,
 				Cond_ReqBrightness = false,
 				
 				--Minimum amount of seconds that need to pass for this phase to expire, 15min
@@ -985,7 +986,7 @@ Biters.Phases =
 		--Text message(s) displayed when swapping to this phase
 		StartWarnings = {'The biters have become aggitated.'},
 		--Hint message
-		HintWarnings = {'Attacking & polluting them will provoke them.'},
+		HintWarnings = {'Attacking & polluting them will continue to provoke them.'},
 		--Text message(s) displayed when repeating this phase
 		ContinueWarnings = {'The biters are aggitated.'},
 		
@@ -997,18 +998,18 @@ Biters.Phases =
 				Title = " (Low Activity)",
 				
 				--Condition for whether this variation is used, if cycles completed between this range it is valid
-				MinCyclesComplete = -1.0, 
-				MaxCyclesComplete = -1.0,
+				Cond_MinCyclesComplete = -1.0, 
+				Cond_MaxCyclesComplete = -1.0,
 				Cond_ReqCycleComplete = false,
 				
 				--Condition for whether this variation is used, if evolution between this range it is valid
-				MinEvolution = 0.25,
-				MaxEvolution = 0.45,
+				Cond_MinEvolution = 0.25,
+				Cond_MaxEvolution = 0.45,
 				Cond_ReqEvolution = true,
 				
 				--Condition for whether this variation is used, if brightness between this range it is valid
-				MinBrightness = -1.0,
-				MaxBrightness = -1.0,
+				Cond_MinBrightness = -1.0,
+				Cond_MaxBrightness = -1.0,
 				Cond_ReqBrightness = false,
 				
 				--Minimum amount of seconds that need to pass for this phase to expire, 10min
@@ -1092,16 +1093,16 @@ Biters.Phases =
 				Title = " (Low-Medium Activity)",
 				
 				--Condition for whether this variation is used, if cycles completed between this range it is valid
-				MinCyclesComplete = -1.0, 
-				MaxCyclesComplete = -1.0,
+				Cond_MinCyclesComplete = -1.0, 
+				Cond_MaxCyclesComplete = -1.0,
 				
 				--Condition for whether this variation is used, if evolution between this range it is valid
-				MinEvolution = 0.45,
-				MaxEvolution = -1.0,
+				Cond_MinEvolution = 0.45,
+				Cond_MaxEvolution = -1.0,
 				
 				--Condition for whether this variation is used, if brightness between this range it is valid
-				MinBrightness = -1.0,
-				MaxBrightness = -1.0,
+				Cond_MinBrightness = -1.0,
+				Cond_MaxBrightness = -1.0,
 				
 				--Minimum amount of seconds that need to pass for this phase to expire, 10min
 				MinDuration = 600,					
@@ -1205,80 +1206,201 @@ end
 --Called each mod tick (every 1 sec)
 function Biters.Tick(self, currentState, previousState, config)
 	LogDebug('Biters.Tick()')
+	
+	local currentBiterState = currentState.BiterState
+	local currentPhaseState = currentBiterState.CurrentPhaseState
+	local currentPhaseConfig = currentPhaseState.CurrentPhase
+	local currentPhaseVarData = currentPhaseState.CurrentPhaseVarData
 
-	LogDebug('Permanen-t Evolution: ' .. currentBiterState.PermanentEvolution .. ', TempNightEvolution: ' .. currentBiterState.TempNightEvolution .. ', Phase: ' .. currentBiterPhaseVarData.Name)
+	LogDebug('Permanent Evolution: ' .. currentBiterState.PermanentEvolution .. ', TempNightEvolution: ' .. currentBiterState.TempNightEvolution .. ', Phase: ' .. currentPhaseVarData.Name)
+		
+	self:UpdatePhase(currentState, previousState, config)
 	
 	self:UpdateEvolution(currentState, previousState, config)
-	
-	self:UpdatePhase(currentState, previousState, config)
 	
 	LogDebug('Exit Biters.Tick()')
 end
 
 --Called when beginning a new phase
 function Biters.StartNewPhase(self, currentState, previousState, config)
-	local currentBiterPhase = currentState.BiterState.CurrentPhaseState.CurrentPhase
-	local currentBiterPhaseVarData = currentState.BiterState.CurrentPhaseState.CurrentPhaseVarData
+	LogDebug('Biters.StartNewPhase()')
+
+	local currentBiterPhaseState = currentState.BiterState.CurrentPhaseState
+	local currentBiterPhase = nil
+	local currentBiterPhaseVarData = nil
+	if currentBiterPhaseState ~= nil then 
+		currentBiterPhase = currentBiterPhaseState.CurrentPhase
+		currentBiterPhaseVarData = currentBiterPhaseState.CurrentPhaseVarData
+	end
 	
 	local validPhaseData = {}
 	local totalPhaseWeight = 0
 	
 	--Iterate through all phases looking for valid start phases
 	for index,biterPhaseIter in ipairs(Biters.Phases) do
+		LogDebug('Phase: ' .. biterPhaseIter.Name)
+	
 		--If phase not active, or active but not same as current iteration, or is same but can repeat
 		if currentBiterPhase == nil 
 		or currentBiterPhase.Name ~= biterPhaseIter.Name
 		or currentBiterPhaseVarData.CanRepeat == true
 		then
-			local newPhaseVarData = self:GetValidStartPhaseVarData(biterPhaseIter, currentState, previousState, config)
+			local newPhaseVarData = self:GetValidStartPhaseVarData(currentBiterPhaseState, biterPhaseIter, currentState, previousState, config)
 			
 			--If valid start phase var data found
 			if newPhaseVarData ~= nil then
 				--Get phase weight
 				local phaseWeight = 0
-				if currentState.CycleState.IsDay
+				if currentState.CycleState.IsDay then
 					phaseWeight = newPhaseVarData.DayChanceWeight
 				else
 					phaseWeight = newPhaseVarData.NightChanceWeight
 				end
+				
+				LogDebug('Valid phase data with weight: ' .. phaseWeight)
 			
 				--Insert phase into valid phases table
 				table.insert(validPhaseData, {Config = biterPhaseIter, VarData = newPhaseVarData, Weight = phaseWeight})
 				
 				--Accumulate weight chance
 				totalPhaseWeight = totalPhaseWeight + phaseWeight
+				LogDebug('Total weight: ' .. totalPhaseWeight)
+			else
+				LogDebug('No valid phase data')
 			end
+		else
+			LogDebug('Can not repeat phase')
 		end --If phase not active, or active but not same as current iteration, or is same but can repeat
 	end --Iterate through all phases looking for valid start phases
 	
 	local newBiterPhaseIndex = nil
-	local currentWeight
-	local randWeight = math.random(totalPhaseWeight)
+	local currentWeightChance = 0
+	local randWeight = math.random() * totalPhaseWeight
 	LogDebug('randWeight ' .. randWeight)
 	
 	--Pick a phase to start at random
-	for index,currentBiterPhase in ipairs(validPhaseData) do
-		currentWeightChance = currentWeightChance + currentBiterPhase.Weight
+	for index,iterBiterPhase in ipairs(validPhaseData) do
+		currentWeightChance = currentWeightChance + iterBiterPhase.Weight
+		
+		LogDebug('Phase: ' .. iterBiterPhase.Config.Name .. ', CurrentWeight: ' .. currentWeightChance)
 		
 		if randWeight <= currentWeightChance then
 			newBiterPhaseIndex = index
 			break
 		end	
 	end
-
-	IS INDEX FOUND?
-	local currentPhaseState = currentState.Biters.CurrentPhaseState	
+	
+	--Log error if no biter phase discovered :(
+	if newBiterPhaseIndex == nil then
+		LogError('No valid biter phase discovered :(')
+	end
+	
+	--Init state
+	local currentPhaseState = currentState.BiterState.CurrentPhaseState
+	local isRepeat = currentBiterPhase ~= nil and currentBiterPhase.Name == validPhaseData[newBiterPhaseIndex].Config.Name
 	currentPhaseState.CurrentPhase = validPhaseData[newBiterPhaseIndex].Config
-	currentPhaseState.CurrentPhaseVarData = validPhaseData[newBiterPhaseIndex].VarData
+	currentPhaseState.CurrentPhaseVarData = validPhaseData[newBiterPhaseIndex].VarData	
+	currentPhaseState.TotalDurationSeconds = math.random(currentPhaseState.CurrentPhaseVarData.MinDuration, currentPhaseState.CurrentPhaseVarData.MaxDuration)
 	
-	UPDATE THESE
+	--currentPhaseState.TotalDurationSeconds = 8
 	
-		--Timer for how long until this phase expires
-		RemainingDurationSeconds = 0,
-		--How much time the phase is due to last
-		TotalDurationSeconds = 0,
-		--Evolution % at the beginning of this phase			
-		EvolutionStart = 0
+	currentPhaseState.RemainingDurationSeconds = currentPhaseState.TotalDurationSeconds
+	currentPhaseState.EvolutionStart = game.evolution_factor	
+	
+	LogInfo('Chosen phase:' .. currentPhaseState.CurrentPhase.Name .. ', Duration: ' .. currentPhaseState.TotalDurationSeconds .. ', StartEvolution: ' .. currentPhaseState.EvolutionStart)
+	
+	--Apply phase map settings
+	local newMapSettings = currentPhaseState.CurrentPhaseVarData.MapSettings
+		
+	--Apply time settings
+	--game.map_settings.enemy_evolution.time_factor = newMapSettings.enemy_evolution.time_factor
+	game.map_settings.enemy_evolution.destroy_factor = newMapSettings.enemy_evolution.destroy_factor
+	game.map_settings.enemy_evolution.pollution_factor = newMapSettings.enemy_evolution.pollution_factor
+	
+	--Apply expansion settings
+	game.map_settings.enemy_expansion.enabled 						= newMapSettings.enemy_expansion.enabled
+	game.map_settings.enemy_expansion.building_coefficient 			= newMapSettings.enemy_expansion.building_coefficient		
+	game.map_settings.enemy_expansion.max_expansion_distance 		= newMapSettings.enemy_expansion.max_expansion_distance
+	game.map_settings.enemy_expansion.min_player_base_distance 		= newMapSettings.enemy_expansion.min_player_base_distance
+	game.map_settings.enemy_expansion.min_base_spacing				= newMapSettings.enemy_expansion.min_base_spacing
+	game.map_settings.enemy_expansion.min_expansion_cooldown 		= newMapSettings.enemy_expansion.min_expansion_cooldown
+	game.map_settings.enemy_expansion.max_expansion_cooldown 		= newMapSettings.enemy_expansion.max_expansion_cooldown
+	game.map_settings.enemy_expansion.settler_group_min_size 		= newMapSettings.enemy_expansion.settler_group_min_size
+	game.map_settings.enemy_expansion.settler_group_max_size 		= newMapSettings.enemy_expansion.settler_group_max_size
+	
+	--Apply unit group settings
+	game.map_settings.unit_group.min_group_gathering_time 			= newMapSettings.unit_group.min_group_gathering_time
+	game.map_settings.unit_group.max_group_gathering_time 			= newMapSettings.unit_group.max_group_gathering_time
+	game.map_settings.unit_group.max_wait_time_for_late_members 	= newMapSettings.unit_group.max_wait_time_for_late_members	
+	
+	LogDebug('enemy_evolution.time_factor - ' .. newMapSettings.enemy_evolution.time_factor
+	.. ', enemy_evolution.destroy_factor - ' .. newMapSettings.enemy_evolution.destroy_factor
+	.. ', enemy_evolution.pollution_factor - ' .. newMapSettings.enemy_evolution.pollution_factor
+	.. ', enemy_expansion.enabled - ' .. tostring(newMapSettings.enemy_expansion.enabled)
+	.. ', enemy_expansion.building_coefficient - ' .. newMapSettings.enemy_expansion.building_coefficient
+	.. ', enemy_expansion.max_expansion_distance - ' .. newMapSettings.enemy_expansion.max_expansion_distance
+	.. ', enemy_expansion.min_player_base_distance - ' .. newMapSettings.enemy_expansion.min_player_base_distance
+	.. ', enemy_expansion.min_base_spacing - ' .. newMapSettings.enemy_expansion.min_base_spacing
+	.. ', enemy_expansion.min_expansion_cooldown - ' .. newMapSettings.enemy_expansion.min_expansion_cooldown
+	.. ', enemy_expansion.max_expansion_cooldown - ' .. newMapSettings.enemy_expansion.max_expansion_cooldown
+	.. ', enemy_expansion.settler_group_min_size - ' .. newMapSettings.enemy_expansion.settler_group_min_size
+	.. ', enemy_expansion.settler_group_max_size - ' .. newMapSettings.enemy_expansion.settler_group_max_size
+	.. ', unit_group.min_group_gathering_time - ' .. newMapSettings.unit_group.min_group_gathering_time
+	.. ', unit_group.max_group_gathering_time - ' .. newMapSettings.unit_group.max_group_gathering_time
+	.. ', unit_group.max_wait_time_for_late_members - ' .. newMapSettings.unit_group.max_wait_time_for_late_members
+	)
+	
+	currentPhaseState.Messages = {}
+	
+	--Start at 5 second delay
+	local messageCounter = 5
+	local messageGroupBuffer = 3
+	
+	--If phase not repeating
+	if isRepeat == false
+	then
+		--Add start warning messages
+		for index,currentMessage in ipairs(currentPhaseState.CurrentPhase.StartWarnings) do		
+			table.insert(currentPhaseState.Messages, {Message = currentMessage, Delay = messageCounter})
+		end		
+		messageCounter = messageCounter + messageGroupBuffer
+		
+		--Add extra start warning messages
+		if currentPhaseState.CurrentPhaseVarData.StartExtraWarnings ~= nil then
+			for index,currentMessage in ipairs(currentPhaseState.CurrentPhaseVarData.StartExtraWarnings) do		
+				table.insert(currentPhaseState.Messages, {Message = currentMessage, Delay = messageCounter})
+			end			
+			
+			messageCounter = messageCounter + messageGroupBuffer
+		end
+	--If phase repeating
+	else
+		--Add continue warning messages
+		for index,currentMessage in ipairs(currentPhaseState.CurrentPhase.ContinueWarnings) do		
+			table.insert(currentPhaseState.Messages, {Message = currentMessage, Delay = messageCounter})
+		end	
+		messageCounter = messageCounter + messageGroupBuffer
+		
+		--Add continue start warning messages
+		if currentPhaseState.CurrentPhaseVarData.ContinueExtraWarnings ~= nil then
+			for index,currentMessage in ipairs(currentPhaseState.CurrentPhaseVarData.ContinueExtraWarnings) do		
+				table.insert(currentPhaseState.Messages, {Message = currentMessage, Delay = messageCounter})
+			end
+			
+			messageCounter = messageCounter + messageGroupBuffer
+		end
+	end
+	
+	--Add hint messages
+	if currentPhaseState.CurrentPhase.HintWarnings ~= nil then 
+		for index,currentMessage in ipairs(currentPhaseState.CurrentPhase.HintWarnings) do		
+			table.insert(currentPhaseState.Messages, {Message = currentMessage, Delay = messageCounter})
+		end
+			
+		messageCounter = messageCounter + messageGroupBuffer
+	end	
+	
+	LogDebug('Exit Biters.StartNewPhase()')
 end
 
 --Update the biter evolution
@@ -1291,7 +1413,7 @@ function Biters.UpdateEvolution(self, currentState, previousState, config)
 	local currentBiterPhaseVarData = currentBiterPhaseState.CurrentPhaseVarData
 	
 	--Update permanent evolution
-	currentBiterState.PermanentEvolution = math.Min(currentBiterState.MaxPermanentEvolution, currentBiterState.PermanentEvolution + currentBiterState.PermamnentEvolutionRate)
+	currentBiterState.PermanentEvolution = math.min(currentBiterState.MaxPermanentEvolution, currentBiterState.PermanentEvolution + currentBiterState.PermamnentEvolutionRate)
 	
 	local evolutionDelta = 0
 	
@@ -1302,11 +1424,11 @@ function Biters.UpdateEvolution(self, currentState, previousState, config)
 		if currentCycleState.IsDay then
 			local dissapateRate = currentCycleState.Brightness * currentBiterState.TempNightEvolutionDissapateRate
 			
-			local newTempNightEvolution = math.max(0, TempNightEvolution + dissapateRate)
+			local newTempNightEvolution = math.max(0, currentBiterState.TempNightEvolution + dissapateRate)
 			
-			evolutionDelta = evolutionDelta + (TempNightEvolution - newTempNightEvolution)
+			evolutionDelta = evolutionDelta - (currentBiterState.TempNightEvolution - newTempNightEvolution)
 			
-			TempNightEvolution = newTempNightEvolution
+			currentBiterState.TempNightEvolution = newTempNightEvolution
 		end
 	end
 	
@@ -1316,65 +1438,160 @@ function Biters.UpdateEvolution(self, currentState, previousState, config)
 	--Set game evolution
 	game.evolution_factor = math.max(game.evolution_factor + evolutionDelta, currentBiterState.PermanentEvolution)
 	
+	LogDebug(
+	'Evolution: ' .. game.evolution_factor 
+	.. ', PermanentEvolution: ' .. currentBiterState.PermanentEvolution 
+	.. ', TempNightEvolution: ' .. currentBiterState.TempNightEvolution)
+	
 	LogDebug('Exit Biters.UpdateEvolution()')
 end
 
 --Update biter phase
 function Biters.UpdatePhase(self, currentState, previousState, config)
+	LogDebug('Biters.UpdatePhase()')
 
-end
-
---Return a valid phase if biter phase can start given current conditions
-function Biters.GetValidStartPhaseVarData(self, biterPhase, currentState, previousState, config)
+	local currentBiterState = currentState.BiterState
+	local currentPhaseState = currentBiterState.CurrentPhaseState
+	local currentPhaseConfig = currentPhaseState.CurrentPhase
+	local currentPhaseVarData = currentPhaseState.CurrentPhaseVarData
+	
+	--Decrease timer
+	currentPhaseState.RemainingDurationSeconds = currentPhaseState.RemainingDurationSeconds - 1
+	local secondsElapsed = currentPhaseState.TotalDurationSeconds - currentPhaseState.RemainingDurationSeconds
+	
+	--Display messages
+	local messageRemoveCount = 0	
+	if currentPhaseState.Messages ~= nil then	
+		for index,currentMessage in ipairs(currentPhaseState.Messages) do			
+			if currentMessage.Delay > secondsElapsed then
+				break
+			end
+			
+			MessageAll(currentMessage.Message)
+			
+			messageRemoveCount = messageRemoveCount + 1
+		end
+	end
+	
+	if messageRemoveCount > 0 then
+		LogDebug('Popping ' .. messageRemoveCount .. ' messages')
+	
+		--Remove displayed messages
+		for i=1, messageRemoveCount do
+			table.remove(currentPhaseState.Messages, 1)
+		end
+	end
+	
+	--Determine what conditions will break/expire the phase
 	local transitionToDay = false
 	local transitionToNight = false
 	if previousState ~= nil then
 		transitionToDay = (previousState.CycleState.IsDay ~= true and currentState.CycleState.IsDay == true)
 		transitionToNight = (previousState.CycleState.IsDay == true and currentState.CycleState.IsDay ~= true)
 	end
+	local phaseExpired = currentPhaseState.RemainingDurationSeconds <= 0
+	local phaseBreak = self:CanPhaseBreak(currentPhaseState, currentPhaseConfig, currentPhaseVarData, currentState, previousState, config) == true
+	
+	LogDebug(
+			'transitionToDay: ' .. tostring(transitionToDay) ..
+			', transitionToNight: ' .. tostring(transitionToNight) ..
+			', phaseExpired: ' .. tostring(phaseExpired) ..
+			', phaseBreak: ' .. tostring(phaseBreak))
+	
+	--If phase is breaking/expiring
+	if transitionToDay or transitionToNight or phaseExpired or phaseBreak then
+		LogInfo('Phase ' .. currentPhaseVarData.Name .. ' expired')
+	
+		--If was night
+		if previousState.CycleState.IsDay == false then
+			local evolutionDelta = game.evolution_factor - currentPhaseState.EvolutionStart
+			local tempEvolution = evolutionDelta - (evolutionDelta * currentPhaseVarData.EvolutionRetainedAfterNight)
+			
+			LogDebug('Evolution: ' .. game.evolution_factor .. ', TempEvolutionForPhase: ' .. tempEvolution)
+		
+			currentBiterState.TempNightEvolution = currentBiterState.TempNightEvolution + tempEvolution
+		end
+		
+		self:StartNewPhase(currentState, previousState, config)
+	end
+	
+	LogDebug('Exit Biters.UpdatePhase()')
+end
+
+--Return a valid phase if biter phase can start given current conditions
+function Biters.GetValidStartPhaseVarData(self, biterPhaseState, biterPhase, currentState, previousState, config)
+	LogDebug('Biters.GetValidStartPhaseVarData(' .. biterPhase.Name .. ')')
+
+	local transitionToDay = false
+	local transitionToNight = false
+	if previousState ~= nil then
+		transitionToDay = (previousState.CycleState.IsDay ~= true and currentState.CycleState.IsDay == true)
+		transitionToNight = (previousState.CycleState.IsDay == true and currentState.CycleState.IsDay ~= true)
+	end
+	
+	LogDebug('Transition to day & night: ' .. tostring(transitionToDay) .. ', ' .. tostring(transitionToNight))
 
 	--Iterate through each var phase data
 	for index,biterPhaseVarDataIter in ipairs(biterPhase.VariableData) do
+		LogDebug('Iter: ' .. biterPhaseVarDataIter.Name)
+		
+		local dayWeightChance = (currentState.CycleState.IsDay == true and biterPhaseVarDataIter.DayChanceWeight > 0.0)
+		local nightWeightChance = (currentState.CycleState.IsDay == false and biterPhaseVarDataIter.NightChanceWeight > 0.0)
+		local dayStartValid = (transitionToDay == false or biterPhaseVarDataIter.DayStartPhase == true)
+		local nightStartValid = (transitionToNight == false or biterPhaseVarDataIter.NightStartPhase == true)
+		local canBreak = self:CanPhaseBreak(biterPhaseState, biterPhase, biterPhaseVarDataIter, currentState, previousState, config) == true
+	
+		LogDebug(
+			'dayWeightChance: ' .. tostring(dayWeightChance) ..
+			', nightWeightChance: ' .. tostring(nightWeightChance) ..
+			', dayStartValid: ' .. tostring(dayStartValid) ..
+			', nightStartValid: ' .. tostring(nightStartValid) ..
+			', willBreak: ' .. tostring(canBreak))
+	
 		--Preliminary condition checks for valid phase
 		if 		
 			--Has chance to start
 			(
-				(currentState.CycleState.IsDay == true and biterPhaseVarDataIter.DayChanceWeight > 0.0) 
-				or (currentState.CycleState.IsDay == false and biterPhaseVarDataIter.NightChanceWeight > 0.0)
+				dayWeightChance
+				or nightWeightChance
 			)
 			--If day just started and this is a day start phase
-			and (transitionToDay == false or biterPhaseVarDataIter.DayStartPhase == true)
+			and dayStartValid == true
 			--If night just started and this is a night start phase
-			and (transitionToNight == false or biterPhaseVarDataIter.NightStartPhase == true)
+			and nightStartValid == true
 			--Phase will not break
-			and self:CanPhaseBreak(biterPhaseVarDataIter, currentState, previousState, config) ~= true
+			and canBreak ~= true
 		then
+			LogDebug('Passed preliminary conditions')
+			
 			--Check cycle condition
-			local cycleConditionActive = biterPhaseVarDataIter.MinCyclesComplete > -1.0 or biterPhaseVarDataIter.MaxCyclesComplete > -1.0
+			local cycleConditionActive = biterPhaseVarDataIter.Cond_MinCyclesComplete > -1.0 or biterPhaseVarDataIter.Cond_MaxCyclesComplete > -1.0
 			local cycleCondition = 
-				(biterPhaseVarDataIter.MinCyclesComplete <= -1.0 or biterPhaseVarDataIter.MinCyclesComplete <= currentState.CyclesComplete)
+				(biterPhaseVarDataIter.Cond_MinCyclesComplete <= -1.0 or biterPhaseVarDataIter.Cond_MinCyclesComplete <= currentState.CyclesComplete)
 				and
-				(biterPhaseVarDataIter.MaxCyclesComplete <= -1.0 or biterPhaseVarDataIter.MaxCyclesComplete >= currentState.CyclesComplete)
+				(biterPhaseVarDataIter.Cond_MaxCyclesComplete <= -1.0 or biterPhaseVarDataIter.Cond_MaxCyclesComplete >= currentState.CyclesComplete)
 			
 			--Check evolution condition
-			local evolutionConditionActive = biterPhaseVarDataIter.MinEvolution > -1.0 or biterPhaseVarDataIter.MaxEvolution > -1.0
+			local evolutionConditionActive = biterPhaseVarDataIter.Cond_MinEvolution > -1.0 or biterPhaseVarDataIter.Cond_MaxEvolution > -1.0
 			local evolutionCondition = 
-				(biterPhaseVarDataIter.MinEvolution <= -1.0 or biterPhaseVarDataIter.MinEvolution <= game.evolution_factor)
+				(biterPhaseVarDataIter.Cond_MinEvolution <= -1.0 or biterPhaseVarDataIter.Cond_MinEvolution <= game.evolution_factor)
 				and
-				(biterPhaseVarDataIter.MaxEvolution <= -1.0 or biterPhaseVarDataIter.MaxEvolution >= game.evolution_factor)
+				(biterPhaseVarDataIter.Cond_MaxEvolution <= -1.0 or biterPhaseVarDataIter.Cond_MaxEvolution >= game.evolution_factor)
 				
 			--Check brightness condition
-			local brightnessConditionActive = biterPhaseVarDataIter.MinBrightness > -1.0 or biterPhaseVarDataIter.MaxBrightness > -1.0
+			local brightnessConditionActive = biterPhaseVarDataIter.Cond_MinBrightness > -1.0 or biterPhaseVarDataIter.Cond_MaxBrightness > -1.0
 			local brightnessCondition = 
-				(biterPhaseVarDataIter.MinBrightness <= -1.0 or biterPhaseVarDataIter.MinBrightness <= currentState.CycleState.Brightness)
+				(biterPhaseVarDataIter.Cond_MinBrightness <= -1.0 or biterPhaseVarDataIter.Cond_MinBrightness <= currentState.CycleState.Brightness)
 				and
-				(biterPhaseVarDataIter.MaxBrightness <= -1.0 or biterPhaseVarDataIter.MaxBrightness >= currentState.CycleState.Brightness)
+				(biterPhaseVarDataIter.Cond_MaxBrightness <= -1.0 or biterPhaseVarDataIter.Cond_MaxBrightness >= currentState.CycleState.Brightness)
 			
 			--canStart is true if at least one condition is active and true
 			local canStart = 
 			(cycleConditionActive == true and cycleCondition == true)
 			or (evolutionConditionActive == true and evolutionCondition == true)
 			or (brightnessConditionActive == true and brightnessCondition == true)
+			--Or no condition active
+			or (cycleConditionActive == false and evolutionConditionActive == false and brightnessConditionActive == false)
 			
 			--If cycle condition active, required and not true then set to can start to false
 			if canStart == true and cycleConditionActive == true then
@@ -1397,16 +1614,70 @@ function Biters.GetValidStartPhaseVarData(self, biterPhase, currentState, previo
 				end
 			end
 			
+			LogDebug(
+			'cycleConditionActive: ' .. tostring(cycleConditionActive)
+			.. ',  cycleCondition: ' .. tostring(cycleCondition)
+			.. ',  evolutionConditionActive: ' .. tostring(evolutionConditionActive)
+			.. ',  evolutionCondition: ' .. tostring(evolutionCondition)
+			.. ',  brightnessConditionActive: ' .. tostring(brightnessConditionActive)
+			.. ',  brightnessCondition: ' .. tostring(brightnessCondition)
+			.. ',  canStart: ' .. tostring(canStart))
+			
 			--Finally, add to table if can start
 			if canStart == true then
+				
+				LogDebug('Exit Biters.GetValidStartPhaseVarData(' .. biterPhase.Name .. ') with ' .. biterPhaseVarDataIter.Name)
+			
 				return biterPhaseVarDataIter
 			end		
 		end	--If valid phase found
 	end	--Iterate through each var phase data
 	
+	LogDebug('Exit Biters.GetValidStartPhaseVarData(' .. biterPhase.Name .. ') with nil')
 	return nil
 end
 
-function Biters.CanPhaseBreak(self, biterPhaseVarData, currentState, previousState, config)
-
+--Checks, given current conditions, whether a phase is due to break
+function Biters.CanPhaseBreak(self, biterState, biterPhaseConfig, biterPhaseVarData, currentState, previousState, config)
+	LogDebug('Biters.CanPhaseBreak(' .. biterPhaseVarData.Name .. ')')
+	
+	--Check evolution range break
+	local breakMinEvolution = 
+		biterPhaseVarData.MinEvolutionBreak > -1.0
+		and game.evolution_factor < biterPhaseVarData.MinEvolutionBreak
+	local breakMaxEvolution = 
+		biterPhaseVarData.MaxEvolutionBreak > -1.0
+		and game.evolution_factor > biterPhaseVarData.MaxEvolutionBreak
+	
+	--Check evolution delta break
+	local breakEvolutionDelta = false	
+	if biterState ~= nil and biterPhaseVarData.EvolutionDeltaBreak > -1.0 and biterPhaseVarData.EvolutionDeltaBreak ~= 0.0 then
+		if biterPhaseVarData.EvolutionDeltaBreak > 0.0 then
+			breakEvolutionDelta = game.evolution_factor > biterState.EvolutionStart + biterPhaseVarData.EvolutionDeltaBreak
+		else
+			breakEvolutionDelta = game.evolution_factor < biterState.EvolutionStart + biterPhaseVarData.EvolutionDeltaBreak
+		end
+	end
+	
+	--Check brightness range break
+	local breakMinBrightness = 
+		biterPhaseVarData.MinBrightnessBreak > -1.0
+		and currentState.CycleState.Brightness < biterPhaseVarData.MinBrightnessBreak
+	local breakMaxBrightness = 
+		biterPhaseVarData.MaxBrightnessBreak > -1.0
+		and currentState.CycleState.Brightness > biterPhaseVarData.MaxBrightnessBreak
+		
+	LogDebug(
+	'breakMinEvolution: ' .. tostring(breakMinEvolution)
+	.. ', breakMaxEvolution: ' .. tostring(breakMaxEvolution)
+	.. ', breakEvolutionDelta: ' .. tostring(breakEvolutionDelta)
+	.. ', breakMinBrightness: ' .. tostring(breakMinBrightness)
+	.. ', breakMaxBrightness: ' .. tostring(breakMaxBrightness)
+	)
+		
+	local canBreak = breakMinEvolution or breakMaxEvolution or breakEvolutionDelta or breakMinBrightness or breakMaxBrightness
+		
+	LogDebug('Exit Biters.CanPhaseBreak(' .. biterPhaseVarData.Name .. ') with ' .. tostring(canBreak))
+	
+	return canBreak
 end

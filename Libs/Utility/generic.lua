@@ -1,6 +1,9 @@
 require 'Libs/Utility/math'
+require 'Libs/Utility/Logger'
 
 function MessageAll(s)
+	LogDebug('Messaging all: ' .. s)
+
 	for _, player in pairs(game.players) do
 		if player.connected then
 			player.print(s)

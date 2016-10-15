@@ -104,6 +104,11 @@ end
 
 function LogInfo(msg)
 	LogMessage('<Info> ' .. msg)
+	--MessageAll(msg)
+end
+
+function LogError(msg)
+	LogMessage('<Error> ' .. msg)
 end
 
 function LogMessage(msg)	

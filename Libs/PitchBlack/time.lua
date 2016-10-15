@@ -71,7 +71,10 @@ Time.DayPhaseConfig =
 	--Data that has conditions that need to be met to be valid, such as cycles complete
 	VariableData = 
 	{
-		{Name = "Day_v1_1", CyclesComplete = 0, MinLength = 1, MaxLength = 1, MinBrightness = 1, MaxBrightness = 1},
+		--{Name = "Day_v1_1", CyclesComplete = 0, MinLength = 2, MaxLength = 2, MinBrightness = 1, MaxBrightness = 1},
+		--{Name = "Day_v1_2", CyclesComplete = 1, MinLength = 2, MaxLength = 2, MinBrightness = 1, MaxBrightness = 1},
+		--{Name = "Day_v1_3", CyclesComplete = 4, MinLength = 2, MaxLength = 2, MinBrightness = 1, MaxBrightness = 1}
+		{Name = "Day_v1_1", CyclesComplete = 0, MinLength = 17, MaxLength = 17, MinBrightness = 1, MaxBrightness = 1},
 		{Name = "Day_v1_2", CyclesComplete = 1, MinLength = 15, MaxLength = 17, MinBrightness = 1, MaxBrightness = 1},
 		{Name = "Day_v1_3", CyclesComplete = 4, MinLength = 14, MaxLength = 18, MinBrightness = 1, MaxBrightness = 1}
 	}
@@ -185,7 +188,7 @@ function Time.InitPhase(self, currentGlobalState, previousGlobalState, config)
 	local currentPhaseVarData = currentCycleState.CurrentPhaseVarData
 	
 	--Update state whether is day
-	currentCycleState.IsDay = currentPhaseVarData.IsDay
+	currentCycleState.IsDay = currentPhaseConfig.IsDay
 	
 	--Update state durations
 	local minPhaseDuration = currentPhaseVarData.MinLength
@@ -228,7 +231,17 @@ function Time.InitPhase(self, currentGlobalState, previousGlobalState, config)
 		MessageAll(currentCycleState.CurrentPhaseConfig.Warnings[1])
 	end
 	
-	LogInfo('Starting phase: ' .. currentPhaseConfig.Name)
+	--Get previous phase var data name
+	local previousPhaseName = 'nil'
+	if 
+		previousGlobalState ~= nil 
+		and previousGlobalState.CycleState ~= nil 
+		and previousGlobalState.CycleState.CurrentPhaseVarData ~= nil 
+	then
+		previousPhaseName = previousGlobalState.CycleState.CurrentPhaseVarData.Name
+	end
+	
+	LogInfo('Finishing phase: ' .. previousPhaseName .. 'Starting phase: ' .. currentPhaseConfig.Name)
 	
 	LogDebug('Exit Time.InitPhase()')
 end
