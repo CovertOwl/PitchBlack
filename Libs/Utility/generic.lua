@@ -1,5 +1,5 @@
 require 'Libs/Utility/math'
-require 'Libs/Utility/Logger'
+require 'Libs/Utility/logger'
 
 function MessageAll(s)
 	LogDebug('Messaging all: ' .. s)

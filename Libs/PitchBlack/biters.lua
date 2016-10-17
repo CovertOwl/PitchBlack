@@ -629,8 +629,8 @@ Biters.Phases =
 						
 						--0.000004 default, equates to 6% per minute
 						time_factor = 0.001,			
-						--0.002 default, equates to 5% reduction every 10 spawners killed
-						destroy_factor = 0.005,			
+						--0.002 default, equates to 15% reduction every 10 spawners killed
+						destroy_factor = -0.015,			
 						--0.000015 default, double during this phase
 						pollution_factor = 0.00002	
 					},
@@ -724,8 +724,8 @@ Biters.Phases =
 						
 						--0.000004 default, equates to 9% per minute
 						time_factor = 0.0015,			
-						--0.002 default, equates to 4% reduction every 10 spawners killed
-						destroy_factor = 0.004,			
+						--0.002 default, equates to 15% reduction every 10 spawners killed
+						destroy_factor = -0.015,			
 						--0.000015 default, double during this phase
 						pollution_factor = 0.00002	
 					},
