@@ -571,12 +571,12 @@ Biters.Phases =
 				
 				--Condition for whether this variation is used, if cycles completed between this range it is valid
 				Cond_MinCyclesComplete = 1, 
-				Cond_MaxCyclesComplete = -1.0,
+				Cond_MaxCyclesComplete = 3,
 				Cond_ReqCycleComplete = true,
 				
 				--Condition for whether this variation is used, if evolution between this range it is valid
-				Cond_MinEvolution = 0.2,
-				Cond_MaxEvolution = 0.4,
+				Cond_MinEvolution = 0.5,
+				Cond_MaxEvolution = -1.0,
 				Cond_ReqEvolution = true,
 				
 				--Condition for whether this variation is used, if brightness between this range it is valid
@@ -613,7 +613,7 @@ Biters.Phases =
 				--Weighted chance for this phase to occur during the day time
 				DayChanceWeight = 0,
 				--Weighted chance for this phase to occur during the night time
-				NightChanceWeight = 1,
+				NightChanceWeight = 0.25,
 				
 				--Can this phase start when night begins
 				NightStartPhase = false,
@@ -627,10 +627,10 @@ Biters.Phases =
 					{					
 						enabled = true,
 						
-						--0.000004 default, equates to 6% per minute
-						time_factor = 0.001,			
-						--0.002 default, equates to 15% reduction every 10 spawners killed
-						destroy_factor = -0.015,			
+						--0.000004 default, equates to 3% per minute
+						time_factor = 0.0005,			
+						--0.002 default, equates to 20% reduction every 10 spawners killed
+						destroy_factor = -0.02,			
 						--0.000015 default, double during this phase
 						pollution_factor = 0.00002	
 					},
@@ -665,7 +665,7 @@ Biters.Phases =
 				Title = " (Very High Activity)",
 				
 				--Condition for whether this variation is used, if cycles completed between this range it is valid
-				Cond_MinCyclesComplete = 2, 
+				Cond_MinCyclesComplete = 3, 
 				Cond_MaxCyclesComplete = -1.0,
 				Cond_ReqCycleComplete = true,
 				
@@ -708,7 +708,7 @@ Biters.Phases =
 				--Weighted chance for this phase to occur during the day time
 				DayChanceWeight = 0,
 				--Weighted chance for this phase to occur during the night time
-				NightChanceWeight = 1,
+				NightChanceWeight = 0.5,
 				
 				--Can this phase start when night begins
 				NightStartPhase = false,
@@ -722,10 +722,10 @@ Biters.Phases =
 					{					
 						enabled = true,
 						
-						--0.000004 default, equates to 9% per minute
-						time_factor = 0.0015,			
+						--0.000004 default, equates to 4% per minute
+						time_factor = 0.00066,			
 						--0.002 default, equates to 15% reduction every 10 spawners killed
-						destroy_factor = -0.015,			
+						destroy_factor = -0.02,			
 						--0.000015 default, double during this phase
 						pollution_factor = 0.00002	
 					},
