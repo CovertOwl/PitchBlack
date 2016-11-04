@@ -1,9 +1,9 @@
 {
   "name": "PitchBlack",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "title": "Pitch Black",
   "author": "Reapa",  
   "homepage": "https://github.com/CovertOwl/PitchBlack",
   "description": "Ever seen the movie \"Pitch Black\"? If you're having trouble surviving contact Vin_Diesel@PitchBlackSupport.com.\nLastly, keep an eye on warning messages and your pollution output.",
-  "factorio_version": "0.13"
+  "factorio_version": "0.14"
 }
