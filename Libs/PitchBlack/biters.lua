@@ -6,15 +6,16 @@ Biters = {}
 Biters.DefaultState =
 {	
 	--Meta information
-	Name = 'BitersState_v1',
+	Name = 'BitersState_v2',
 
-	--Increase biter permanent evolution rate by 15% per 10 hours
-	PermamnentEvolutionRate = 0.000004,
-
-	--Permanent biter evolution cannot go above this
-	MaxPermanentEvolution = 0.3,
+	--Increase permanent biter by a fixed rate ([#][2]) per second if current biter evolution is below margin ([#][1])
+	--2.5 hours to get to 25%
+	--another 3.75 hours to get to 50%
+	--another 7 hours to get to 75%
+	--After that it will stop
+	PermamnentEvolutionRates = {{0.25, 0.00003},{0.5,0.00002},{0.75,0.00001},{1.0,0.0}},
 	
-	--Current permanent biter evolution cannot go above this
+	--Current biter evolution cannot go below this
 	PermanentEvolution = 0,
 	
 	--The evolution accumulated through the night which is temporary
@@ -53,7 +54,7 @@ Biters.Phases =
 		--Hint message
 		HintWarnings = {'Hitting them now will reduce their strength.', 'However, pollution output is agitating them greatly!'},
 		--Text message(s) displayed when repeating this phase
-		ContinueWarnings = nil,
+		ContinueWarnings = {'The biters continue to swarm the landscape.'},
 		
 		VariableData = 
 		{
@@ -87,7 +88,7 @@ Biters.Phases =
 				ContinueExtraWarnings = nil,
 				
 				--Whether the phase can repeat
-				CanRepeat = false,
+				CanRepeat = true,
 				
 				--How much of the evolution is kept after night (the rest is slowly removed) 
 				EvolutionRetainedAfterNight = 0.1,
@@ -101,7 +102,7 @@ Biters.Phases =
 				
 				--Phase expiry condition, if brightness falls out of this range the phase will end
 				MinBrightnessBreak = -1.0,
-				MaxBrightnessBreak = 0.4,
+				MaxBrightnessBreak = -1.0,
 				
 				--Weighted chance for this phase to occur during the day time
 				DayChanceWeight = 0,
@@ -133,13 +134,13 @@ Biters.Phases =
 						enabled = true,
 						
 						--0.1 default
-						building_coefficient = 0.1, 
+						building_coefficient = 0.0, 
 						
 						max_expansion_distance = 8, 
-						min_player_base_distance = 6,
-						min_base_spacing = 5, 
-						min_expansion_cooldown = 1200,	--20s
-						max_expansion_cooldown = 1800,	--30s
+						min_player_base_distance = 0,
+						min_base_spacing = 3, 
+						min_expansion_cooldown = 600,	--10s
+						max_expansion_cooldown = 1200,	--20s
 						settler_group_min_size = 4,
 						settler_group_max_size = 8
 					},
@@ -163,7 +164,7 @@ Biters.Phases =
 				Cond_ReqCycleComplete = false,
 				
 				--Condition for whether this variation is used, if evolution between this range it is valid
-				Cond_MinEvolution = 0.2,
+				Cond_MinEvolution = 0.3,
 				Cond_MaxEvolution = -1.0,
 				Cond_ReqEvolution = false,
 				
@@ -182,7 +183,7 @@ Biters.Phases =
 				ContinueExtraWarnings = nil,
 				
 				--Whether the phase can repeat
-				CanRepeat = false,
+				CanRepeat = true,
 				
 				--How much of the evolution is kept after night (the rest is slowly removed) 
 				EvolutionRetainedAfterNight = 0.1,
@@ -196,7 +197,7 @@ Biters.Phases =
 				
 				--Phase expiry condition, if brightness falls out of this range the phase will end
 				MinBrightnessBreak = -1,
-				MaxBrightnessBreak = 0.4,
+				MaxBrightnessBreak = -1.0,
 				
 				--Weighted chance for this phase to occur during the day time
 				DayChanceWeight = 0,
@@ -228,13 +229,13 @@ Biters.Phases =
 						enabled = true,
 						
 						--0.1 default
-						building_coefficient = 0.1, 
+						building_coefficient = 0.0, 
 						
 						max_expansion_distance = 12, 
-						min_player_base_distance = 3,
-						min_base_spacing = 4, 
-						min_expansion_cooldown = 600,	--10s
-						max_expansion_cooldown = 1200,	--20s
+						min_player_base_distance = 0,
+						min_base_spacing = 3, 
+						min_expansion_cooldown = 120,	--2s
+						max_expansion_cooldown = 360,	--6s
 						settler_group_min_size = 7,
 						settler_group_max_size = 10
 					},
@@ -258,7 +259,7 @@ Biters.Phases =
 				Cond_ReqCycleComplete = false,
 				
 				--Condition for whether this variation is used, if evolution between this range it is valid
-				Cond_MinEvolution = 0.4,
+				Cond_MinEvolution = 0.5,
 				Cond_MaxEvolution = -1.0,
 				Cond_ReqEvolution = false,
 				
@@ -277,7 +278,7 @@ Biters.Phases =
 				ContinueExtraWarnings = nil,
 				
 				--Whether the phase can repeat
-				CanRepeat = false,
+				CanRepeat = true,
 				
 				--How much of the evolution is kept after night (the rest is slowly removed) 
 				EvolutionRetainedAfterNight = 0.1,
@@ -291,7 +292,7 @@ Biters.Phases =
 				
 				--Phase expiry condition, if brightness falls out of this range the phase will end
 				MinBrightnessBreak = -1,
-				MaxBrightnessBreak = 0.4,
+				MaxBrightnessBreak = -1.0,
 				
 				--Weighted chance for this phase to occur during the day time
 				DayChanceWeight = 0,
@@ -327,7 +328,7 @@ Biters.Phases =
 						
 						max_expansion_distance = 12, 
 						min_player_base_distance = 0,
-						min_base_spacing = 4, 
+						min_base_spacing = 3, 
 						min_expansion_cooldown = 120,	--2s
 						max_expansion_cooldown = 180,	--3s
 						settler_group_min_size = 10,
@@ -402,12 +403,12 @@ Biters.Phases =
 				
 				--Phase expiry condition, if brightness falls out of this range the phase will end
 				MinBrightnessBreak = -1.0,
-				MaxBrightnessBreak = 0.4,
+				MaxBrightnessBreak = -1.0,
 				
 				--Weighted chance for this phase to occur during the day time
 				DayChanceWeight = 0,
 				--Weighted chance for this phase to occur during the night time
-				NightChanceWeight = 1,
+				NightChanceWeight = 0.5,
 				
 				--Can this phase start when night begins
 				NightStartPhase = false,
@@ -434,7 +435,7 @@ Biters.Phases =
 						enabled = true,
 						
 						--0.1 default
-						building_coefficient = 0.1, 
+						building_coefficient = 0.0, 
 						
 						max_expansion_distance = 5, 
 						min_player_base_distance = 6,
@@ -497,12 +498,12 @@ Biters.Phases =
 				
 				--Phase expiry condition, if brightness falls out of this range the phase will end
 				MinBrightnessBreak = -1,
-				MaxBrightnessBreak = 0.4,
+				MaxBrightnessBreak = -1.0,
 				
 				--Weighted chance for this phase to occur during the day time
 				DayChanceWeight = 0,
 				--Weighted chance for this phase to occur during the night time
-				NightChanceWeight = 1,
+				NightChanceWeight = 0.5,
 				
 				--Can this phase start when night begins
 				NightStartPhase = false,
@@ -529,7 +530,7 @@ Biters.Phases =
 						enabled = true,
 						
 						--0.1 default
-						building_coefficient = 0.1, 
+						building_coefficient = 0.0, 
 						
 						max_expansion_distance = 5, 
 						min_player_base_distance = 4,
@@ -608,7 +609,7 @@ Biters.Phases =
 				
 				--Phase expiry condition, if brightness falls out of this range the phase will end
 				MinBrightnessBreak = -1,
-				MaxBrightnessBreak = 0.4,
+				MaxBrightnessBreak = -1.0,
 				
 				--Weighted chance for this phase to occur during the day time
 				DayChanceWeight = 0,
@@ -640,7 +641,7 @@ Biters.Phases =
 						enabled = true,
 						
 						--0.1 default
-						building_coefficient = 0.1, 
+						building_coefficient = 0.0, 
 						
 						max_expansion_distance = 6, 
 						min_player_base_distance = 6,
@@ -703,7 +704,7 @@ Biters.Phases =
 				
 				--Phase expiry condition, if brightness falls out of this range the phase will end
 				MinBrightnessBreak = -1,
-				MaxBrightnessBreak = 0.4,
+				MaxBrightnessBreak = -1.0,
 				
 				--Weighted chance for this phase to occur during the day time
 				DayChanceWeight = 0,
@@ -735,7 +736,7 @@ Biters.Phases =
 						enabled = true,
 						
 						--0.1 default
-						building_coefficient = 0.1, 
+						building_coefficient = 0.0, 
 						
 						max_expansion_distance = 6, 
 						min_player_base_distance = 6,
@@ -1190,6 +1191,14 @@ function Biters.Init(self, globalState, config)
 	--Ingame evolution time is silly and doesnt work properly methinks
 	game.map_settings.enemy_evolution.time_factor = 0
 	
+	if globalState.BiterState ~= nil and globalState.BiterState.Name ~= Biters.DefaultState.Name then
+		
+		LogDebug('Cycle state is old! Starting a new one...')
+	
+		globalState.BiterState = DeepCopy(Biters.DefaultState)
+		self:StartNewPhase(globalState, nil, config)
+	end
+	
 	if globalState.BiterState == nil then
 		
 		LogDebug('Cycle state does not exist! Starting a new one...')
@@ -1314,8 +1323,8 @@ function Biters.StartNewPhase(self, currentState, previousState, config)
 		
 	--Apply time settings
 	--game.map_settings.enemy_evolution.time_factor = newMapSettings.enemy_evolution.time_factor
-	game.map_settings.enemy_evolution.destroy_factor = newMapSettings.enemy_evolution.destroy_factor
-	game.map_settings.enemy_evolution.pollution_factor = newMapSettings.enemy_evolution.pollution_factor
+	game.map_settings.enemy_evolution.destroy_factor = newMapSettings.enemy_evolution.destroy_factor * config.ScaleEvolutionRate
+	game.map_settings.enemy_evolution.pollution_factor = newMapSettings.enemy_evolution.pollution_factor * config.ScaleEvolutionRate
 	
 	--Apply expansion settings
 	game.map_settings.enemy_expansion.enabled 						= newMapSettings.enemy_expansion.enabled
@@ -1376,10 +1385,13 @@ function Biters.StartNewPhase(self, currentState, previousState, config)
 	--If phase repeating
 	else
 		--Add continue warning messages
-		for index,currentMessage in ipairs(currentPhaseState.CurrentPhase.ContinueWarnings) do		
-			table.insert(currentPhaseState.Messages, {Message = currentMessage, Delay = messageCounter})
-		end	
-		messageCounter = messageCounter + messageGroupBuffer
+		if currentPhaseState.CurrentPhase.ContinueWarnings ~= nil then
+			for index,currentMessage in ipairs(currentPhaseState.CurrentPhase.ContinueWarnings) do		
+				table.insert(currentPhaseState.Messages, {Message = currentMessage, Delay = messageCounter})
+			end
+			
+			messageCounter = messageCounter + messageGroupBuffer
+		end
 		
 		--Add continue start warning messages
 		if currentPhaseState.CurrentPhaseVarData.ContinueExtraWarnings ~= nil then
@@ -1412,8 +1424,21 @@ function Biters.UpdateEvolution(self, currentState, previousState, config)
 	local currentBiterPhase = currentBiterPhaseState.CurrentPhase
 	local currentBiterPhaseVarData = currentBiterPhaseState.CurrentPhaseVarData
 	
+	local scaleEvolutionRate =  config.ScaleEvolutionRate
+	
+	local permamnentEvolutionRate = 0.0
+	
+	--Iterate through permanent evolution scale rates to find the current one
+	for index,scalePair in ipairs(currentBiterState.PermamnentEvolutionRates) do
+		if currentBiterState.PermanentEvolution < scalePair[1] then
+			permamnentEvolutionRate = scalePair[2]
+		end
+	end	
+	
+	LogDebug('PermamnentEvolutionRate: ' .. permamnentEvolutionRate)
+	
 	--Update permanent evolution
-	currentBiterState.PermanentEvolution = math.min(currentBiterState.MaxPermanentEvolution, currentBiterState.PermanentEvolution + currentBiterState.PermamnentEvolutionRate)
+	currentBiterState.PermanentEvolution = math.min(1.0, currentBiterState.PermanentEvolution + (permamnentEvolutionRate * scaleEvolutionRate))
 	
 	local evolutionDelta = 0
 	
@@ -1436,7 +1461,7 @@ function Biters.UpdateEvolution(self, currentState, previousState, config)
 	evolutionDelta = evolutionDelta + currentBiterPhaseVarData.MapSettings.enemy_evolution.time_factor
 	
 	--Set game evolution
-	game.evolution_factor = math.max(game.evolution_factor + evolutionDelta, currentBiterState.PermanentEvolution)
+	game.evolution_factor = math.max(game.evolution_factor + (evolutionDelta * scaleEvolutionRate), currentBiterState.PermanentEvolution)
 	
 	LogDebug(
 	'Evolution: ' .. game.evolution_factor 
@@ -1539,7 +1564,7 @@ function Biters.GetValidStartPhaseVarData(self, biterPhaseState, biterPhase, cur
 		local nightWeightChance = (currentState.CycleState.IsDay == false and biterPhaseVarDataIter.NightChanceWeight > 0.0)
 		local dayStartValid = (transitionToDay == false or biterPhaseVarDataIter.DayStartPhase == true)
 		local nightStartValid = (transitionToNight == false or biterPhaseVarDataIter.NightStartPhase == true)
-		local canBreak = self:CanPhaseBreak(biterPhaseState, biterPhase, biterPhaseVarDataIter, currentState, previousState, config) == true
+		local canBreak = self:CanPhaseBreak(nil, biterPhase, biterPhaseVarDataIter, currentState, previousState, config) == true
 	
 		LogDebug(
 			'dayWeightChance: ' .. tostring(dayWeightChance) ..

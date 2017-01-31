@@ -71,12 +71,10 @@ Time.DayPhaseConfig =
 	--Data that has conditions that need to be met to be valid, such as cycles complete
 	VariableData = 
 	{
-		--{Name = "Day_v1_1", CyclesComplete = 0, MinLength = 2, MaxLength = 2, MinBrightness = 1, MaxBrightness = 1},
-		--{Name = "Day_v1_2", CyclesComplete = 1, MinLength = 2, MaxLength = 2, MinBrightness = 1, MaxBrightness = 1},
-		--{Name = "Day_v1_3", CyclesComplete = 4, MinLength = 2, MaxLength = 2, MinBrightness = 1, MaxBrightness = 1}
-		{Name = "Day_v1_1", CyclesComplete = 0, MinLength = 17, MaxLength = 17, MinBrightness = 1, MaxBrightness = 1},
-		{Name = "Day_v1_2", CyclesComplete = 1, MinLength = 15, MaxLength = 17, MinBrightness = 1, MaxBrightness = 1},
-		{Name = "Day_v1_3", CyclesComplete = 4, MinLength = 14, MaxLength = 18, MinBrightness = 1, MaxBrightness = 1}
+		{Name = "Day_v1_1", CyclesComplete = 0, MinLength = 12, MaxLength = 12, MinBrightness = 1, MaxBrightness = 1},
+		{Name = "Day_v1_2", CyclesComplete = 1, MinLength = 6, MaxLength = 6, MinBrightness = 0.6, MaxBrightness = 0.6},
+		{Name = "Day_v1_2", CyclesComplete = 2, MinLength = 5, MaxLength = 5, MinBrightness = 0.4, MaxBrightness = 0.5},
+		{Name = "Day_v1_2", CyclesComplete = 3, MinLength = 4, MaxLength = 4, MinBrightness = 0.3, MaxBrightness = 0.4}
 	}
 }
 
@@ -128,12 +126,10 @@ Time.NightPhaseConfig =
 	--Data that has conditions that need to be met to be valid, such as cycles complete
 	VariableData = 
 	{
-		{Name = "Night_v1_1", CyclesComplete = 0, MinLength = 2, MaxLength = 2, MinBrightness = 0.3, MaxBrightness = 0.3},
-		{Name = "Night_v1_2", CyclesComplete = 1, MinLength = 3, MaxLength = 3, MinBrightness = 0.2, MaxBrightness = 0.3},
-		{Name = "Night_v1_3", CyclesComplete = 2, MinLength = 4, MaxLength = 4, MinBrightness = 0.1, MaxBrightness = 0.2},
-		{Name = "Night_v1_4", CyclesComplete = 3, MinLength = 4, MaxLength = 5, MinBrightness = 0.0, MaxBrightness = 0.2},
-		{Name = "Night_v1_5", CyclesComplete = 4, MinLength = 4, MaxLength = 6, MinBrightness = 0.0, MaxBrightness = 0.2},
-		{Name = "Night_v1_6", CyclesComplete = 5, MinLength = 4, MaxLength = 7, MinBrightness = 0.0, MaxBrightness = 0.2}
+		{Name = "Night_v1_1", CyclesComplete = 0, MinLength = 1, MaxLength = 1, MinBrightness = 0.0, MaxBrightness = 0.0},
+		{Name = "Night_v1_2", CyclesComplete = 1, MinLength = 2, MaxLength = 2, MinBrightness = 0.0, MaxBrightness = 0.0},
+		{Name = "Night_v1_3", CyclesComplete = 2, MinLength = 2, MaxLength = 2, MinBrightness = 0.0, MaxBrightness = 0.0},
+		{Name = "Night_v1_4", CyclesComplete = 3, MinLength = 3, MaxLength = 3, MinBrightness = 0.0, MaxBrightness = 0.0}
 	}
 }
 
@@ -202,20 +198,20 @@ function Time.InitPhase(self, currentGlobalState, previousGlobalState, config)
 	if currentPhaseConfig.IsTransition == false then
 		LogDebug('Is not transition phase.')
 	
-		if currentCycleState.Brightness  == nil then
+		--if currentCycleState.Brightness == nil then
 			local minBrightness = currentPhaseVarData.MinBrightness
 			local maxBrightness = currentPhaseVarData.MaxBrightness
 			
 			currentCycleState.Brightness = Math.RandomFloat(minBrightness, maxBrightness)
 		
 			LogDebug('Phase Brightness set: ' .. currentCycleState.Brightness)
-		end
+		--end
 	else
 		LogDebug('Is transition phase.')
 	
 		--Determine transition-to cycle
 		currentCycleState.NextNonTransitionPhaseConfig = self:GetNextNonTransitionPhaseConfig(currentGlobalState, config)
-		currentCycleState.NextNonTransitionPhaseVarData = self:GetPhaseVariableData(currentGlobalState, currentCycleState.NextNonTransitionPhaseConfig, config)
+		currentCycleState.NextNonTransitionPhaseVarData = self:GetPhaseVariableData(currentGlobalState, currentCycleState.NextNonTransitionPhaseConfig, 1, config)
 		
 		--Set transition brightness, which is last phase brightness to next phase brightness
 		local minBrightness = currentCycleState.NextNonTransitionPhaseVarData.MinBrightness
@@ -247,13 +243,13 @@ function Time.InitPhase(self, currentGlobalState, previousGlobalState, config)
 end
 
 --Given a state, get the variable data
-function Time.GetPhaseVariableData(self, globalState, phase, config)
+function Time.GetPhaseVariableData(self, globalState, phase, cycleOffset, config)
 	LogDebug('Time.GetPhaseVariableData(' .. phase.Name .. ')')
 	
-	local lastVariableData = nil	
+	local lastVariableData = nil
 	
 	for index, phaseVariableDataIter in ipairs(phase.VariableData) do	
-		if globalState.CyclesComplete < phaseVariableDataIter.CyclesComplete then
+		if (globalState.CyclesComplete + cycleOffset) < phaseVariableDataIter.CyclesComplete then
 			break
 		end
 		
@@ -305,7 +301,7 @@ function Time.StartDay(self, currentGlobalState, previousGlobalState, config)
 	--This should only occur during init
 	else
 		currentCycleState.CurrentPhaseConfig = Time.DayPhaseConfig
-		currentCycleState.CurrentPhaseVarData = self:GetPhaseVariableData(currentGlobalState, currentCycleState.CurrentPhaseConfig, config)
+		currentCycleState.CurrentPhaseVarData = self:GetPhaseVariableData(currentGlobalState, currentCycleState.CurrentPhaseConfig, 0, config)
 		
 		LogDebug('Start day with new phase & data: ' .. currentCycleState.CurrentPhaseConfig.Name .. ', ' .. currentCycleState.CurrentPhaseVarData.Name)
 	end
@@ -321,7 +317,7 @@ function Time.StartDusk(self, currentGlobalState, previousGlobalState, config)
 	
 	local cycleState = currentGlobalState.CycleState
 	cycleState.CurrentPhaseConfig = Time.DuskPhaseConfig
-	cycleState.CurrentPhaseVarData = self:GetPhaseVariableData(currentGlobalState, cycleState.CurrentPhaseConfig, config)
+	cycleState.CurrentPhaseVarData = self:GetPhaseVariableData(currentGlobalState, cycleState.CurrentPhaseConfig, 0, config)
 	
 	LogDebug('Start dusk with new phase & data: ' .. cycleState.CurrentPhaseConfig.Name .. ', ' .. cycleState.CurrentPhaseVarData.Name)
 	
@@ -336,7 +332,7 @@ function Time.StartDawn(self, currentGlobalState, previousGlobalState, config)
 	
 	local cycleState = currentGlobalState.CycleState
 	cycleState.CurrentPhaseConfig = Time.DawnPhaseConfig
-	cycleState.CurrentPhaseVarData = self:GetPhaseVariableData(currentGlobalState, cycleState.CurrentPhaseConfig, config)
+	cycleState.CurrentPhaseVarData = self:GetPhaseVariableData(currentGlobalState, cycleState.CurrentPhaseConfig, 0, config)
 	
 	LogDebug('Start dawn with new phase & data: ' .. cycleState.CurrentPhaseConfig.Name .. ', ' .. cycleState.CurrentPhaseVarData.Name)
 	
@@ -369,7 +365,7 @@ function Time.StartNight(self, currentGlobalState, previousGlobalState, config)
 	--This should only occur during init
 	else
 		currentCycleState.CurrentPhaseConfig = Time.NightPhaseConfig
-		currentCycleState.CurrentPhaseVarData = self:GetPhaseVariableData(currentGlobalState, currentCycleState.CurrentPhaseConfig, config)
+		currentCycleState.CurrentPhaseVarData = self:GetPhaseVariableData(currentGlobalState, currentCycleState.CurrentPhaseConfig, 0, config)
 		
 		LogDebug('Start night with new phase & data: ' .. currentCycleState.CurrentPhaseConfig.Name .. ', ' .. currentCycleState.CurrentPhaseVarData.Name)
 	end
@@ -399,6 +395,7 @@ function Time.Tick(self, currentGlobalState, previousGlobalState, config)
 	end
 	
 	--Update game brightness if there is a difference
+	LogDebug('Curr Brightness: ' .. currentCycleState.Brightness .. ', Prev Brightness: ' .. previousCycleState.Brightness)
 	if currentCycleState.Brightness ~= previousCycleState.Brightness then
 		LogDebug('Set Brightness: ' .. currentCycleState.Brightness)
 	

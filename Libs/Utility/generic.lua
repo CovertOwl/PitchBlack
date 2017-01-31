@@ -27,5 +27,5 @@ end
 
 function SetBrightness(scalar)
 	--Lerp between day (0.5 = noon) and night (0.0 = midnight)
-	game.surfaces.nauvis.daytime = Math.Lerp(0.5, 0.25, scalar)
+	game.surfaces.nauvis.daytime = Math.Lerp(0.42, 0.25, scalar)
 end

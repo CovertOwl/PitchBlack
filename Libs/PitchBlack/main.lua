@@ -18,16 +18,10 @@ DefaultGlobalData = {
 		Second = 0
 	},
 	
-	Config = 
-	{
-		--Number of real seconds in a game day, 10 minutes
-		DayLength = 600
-	},
-	
 	--Some meta
 	Name = 'HelloWorld',
 	Title = 'Hello World',
-	Version = '0.0.3',
+	Version = '0.0.4',
 	
 	--Total elapsed ticks for the current second
 	ElapsedTicksOfSecond = 0,
@@ -54,8 +48,8 @@ function Main.On_Tick(self)
 		global.Data.PreviousState = DeepCopy(global.Data.CurrentState)
 		
 		--Update mod
-		Time:Tick(global.Data.CurrentState, global.Data.PreviousState, global.Data.Config)
-		Biters:Tick(global.Data.CurrentState, global.Data.PreviousState, global.Data.Config)
+		Time:Tick(global.Data.CurrentState, global.Data.PreviousState, Config)
+		Biters:Tick(global.Data.CurrentState, global.Data.PreviousState, Config)
 		
 		--Commit update to game state
 		LogDebug('End Main Tick')
@@ -94,8 +88,8 @@ function Main.InitWorld(self)
 	end
 	
 	--Init other modules
-	Time:Init(global.Data.CurrentState, global.Data.Config)
-	Biters:Init(global.Data.CurrentState, global.Data.Config)
+	Time:Init(global.Data.CurrentState, Config)
+	Biters:Init(global.Data.CurrentState, Config)
 	
 	LogDebug('Main.InitWorld()')
 end

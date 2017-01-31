@@ -1,4 +1,6 @@
+require 'config'
 require 'Libs/PitchBlack/main'
+
 
 --On load game for first time
 script.on_init(function(data)
