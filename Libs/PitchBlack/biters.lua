@@ -1432,6 +1432,7 @@ function Biters.UpdateEvolution(self, currentState, previousState, config)
 	for index,scalePair in ipairs(currentBiterState.PermamnentEvolutionRates) do
 		if currentBiterState.PermanentEvolution < scalePair[1] then
 			permamnentEvolutionRate = scalePair[2]
+			break
 		end
 	end	
 	
