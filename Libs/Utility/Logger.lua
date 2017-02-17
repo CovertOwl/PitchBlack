@@ -1,3 +1,5 @@
+require 'config'
+
 --- Logger module
 -- @module Logger
 
@@ -97,14 +99,15 @@ function Logger.new(mod_name, log_name, debug_mode, options)
     return Logger
 end
 
-pbLogger = Logger.new("PB", "main", true)
+pbLogger = Logger.new("PB", "main", Config.DebugMode)
 function LogDebug(msg)
-	LogMessage('<Debug> ' .. msg)
+	if (pbLogger.debug_mode) then
+		LogMessage('<Debug> ' .. msg)
+	end
 end
 
 function LogInfo(msg)
 	LogMessage('<Info> ' .. msg)
-	--MessageAll(msg)
 end
 
 function LogError(msg)

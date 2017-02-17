@@ -1,6 +1,7 @@
 require 'Libs/Utility/logger'
 require 'Libs/Utility/math'
 require 'Libs/Utility/generic'
+require 'config'
 
 --PHASE or TIME PHASE =  (day, dusk, night etc)
 
@@ -71,7 +72,7 @@ Time.DayPhaseConfig =
 	--Data that has conditions that need to be met to be valid, such as cycles complete
 	VariableData = 
 	{
-		{Name = "Day_v1_1", CyclesComplete = 0, MinLength = 12, MaxLength = 12, MinBrightness = 1, MaxBrightness = 1},
+		{Name = "Day_v1_1", CyclesComplete = 0, MinLength = Config.FirstDayPhaseLength, MaxLength = Config.FirstDayPhaseLength, MinBrightness = 1, MaxBrightness = 1},
 		{Name = "Day_v1_2", CyclesComplete = 1, MinLength = 6, MaxLength = 6, MinBrightness = 0.6, MaxBrightness = 0.6},
 		{Name = "Day_v1_2", CyclesComplete = 2, MinLength = 5, MaxLength = 5, MinBrightness = 0.4, MaxBrightness = 0.5},
 		{Name = "Day_v1_2", CyclesComplete = 3, MinLength = 4, MaxLength = 4, MinBrightness = 0.3, MaxBrightness = 0.4}
