@@ -1,5 +1,3 @@
-require 'config'
-
 --- Logger module
 -- @module Logger
 
@@ -99,7 +97,7 @@ function Logger.new(mod_name, log_name, debug_mode, options)
     return Logger
 end
 
-pbLogger = Logger.new("PB", "main", Config.DebugMode)
+pbLogger = Logger.new("PB", "main", settings.global["pitch-DebugMode"])
 function LogDebug(msg)
 	if (pbLogger.debug_mode) then
 		LogMessage('<Debug> ' .. msg)

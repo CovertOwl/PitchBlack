@@ -1323,8 +1323,9 @@ function Biters.StartNewPhase(self, currentState, previousState, config)
 		
 	--Apply time settings
 	--game.map_settings.enemy_evolution.time_factor = newMapSettings.enemy_evolution.time_factor
-	game.map_settings.enemy_evolution.destroy_factor = newMapSettings.enemy_evolution.destroy_factor * config.ScaleEvolutionRate
-	game.map_settings.enemy_evolution.pollution_factor = newMapSettings.enemy_evolution.pollution_factor * config.ScaleEvolutionRate
+	local scale = settings.global["pitch-ScaleEvolutionRate"].value
+	game.map_settings.enemy_evolution.destroy_factor = newMapSettings.enemy_evolution.destroy_factor * scale 
+	game.map_settings.enemy_evolution.pollution_factor = newMapSettings.enemy_evolution.pollution_factor * scale
 	
 	--Apply expansion settings
 	game.map_settings.enemy_expansion.enabled 						= newMapSettings.enemy_expansion.enabled
@@ -1416,7 +1417,7 @@ function Biters.StartNewPhase(self, currentState, previousState, config)
 end
 
 --Update the biter evolution
-function Biters.UpdateEvolution(_, currentState, _, config)
+function Biters.UpdateEvolution(_, currentState, _, _)
 	LogDebug('Biters.UpdateEvolution()')
 	
 	local currentBiterState = currentState.BiterState
@@ -1424,7 +1425,7 @@ function Biters.UpdateEvolution(_, currentState, _, config)
 	--local currentBiterPhase = currentBiterPhaseState.CurrentPhase
 	local currentBiterPhaseVarData = currentBiterPhaseState.CurrentPhaseVarData
 	
-	local scaleEvolutionRate =  config.ScaleEvolutionRate
+	local scaleEvolutionRate =  settings.global["pitch-ScaleEvolutionRate"].value
 	
 	local permamnentEvolutionRate = 0.0
 	

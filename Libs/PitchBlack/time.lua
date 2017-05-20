@@ -1,11 +1,11 @@
 require 'Libs/Utility/logger'
 require 'Libs/Utility/math'
 require 'Libs/Utility/generic'
-require 'config'
 
 --PHASE or TIME PHASE =  (day, dusk, night etc)
 
 Time = {}
+Time.DayLength = settings.global["pitch-DayLength"].value
 
 --The default state of time
 Time.DefaultState = 
@@ -72,7 +72,7 @@ Time.DayPhaseConfig =
 	--Data that has conditions that need to be met to be valid, such as cycles complete
 	VariableData = 
 	{
-		{Name = "Day_v1_1", CyclesComplete = 0, MinLength = Config.FirstDayPhaseLength, MaxLength = Config.FirstDayPhaseLength, MinBrightness = 1, MaxBrightness = 1},
+		{Name = "Day_v1_1", CyclesComplete = 0, MinLength = settings.global["pitch-FirstDayPhaseLength"].value, MaxLength = settings.global["pitch-FirstDayPhaseLength"].value, MinBrightness = 1, MaxBrightness = 1},
 		{Name = "Day_v1_2", CyclesComplete = 1, MinLength = 6, MaxLength = 6, MinBrightness = 0.6, MaxBrightness = 0.6},
 		{Name = "Day_v1_2", CyclesComplete = 2, MinLength = 5, MaxLength = 5, MinBrightness = 0.4, MaxBrightness = 0.5},
 		{Name = "Day_v1_2", CyclesComplete = 3, MinLength = 4, MaxLength = 4, MinBrightness = 0.3, MaxBrightness = 0.4}
@@ -389,7 +389,7 @@ function Time.Tick(self, currentGlobalState, previousGlobalState, config)
 	
 	--If a transitioning phase, update brightness based on remaining duration
 	if currentCycleState.CurrentPhaseConfig.IsTransition == true then	
-		local scaleBrightness = (currentGlobalState.Second + currentCycleState.PhaseDaysComplete * config.DayLength) / (currentCycleState.PhaseDuration * config.DayLength)
+		local scaleBrightness = (currentGlobalState.Second + currentCycleState.PhaseDaysComplete * Time.DayLength) / (currentCycleState.PhaseDuration * Time.DayLength)
 		LogDebug('Scale Brightness: ' .. scaleBrightness)
 		
 		currentCycleState.Brightness = Math.Lerp(currentCycleState.StartBrightness, currentCycleState.EndBrightness, scaleBrightness)
@@ -412,7 +412,7 @@ function Time.TransitionSecond(self, currentGlobalState, previousGlobalState, co
 	
 	currentGlobalState.Second = currentGlobalState.Second + 1
 
-	if currentGlobalState.Second >= config.DayLength then
+	if currentGlobalState.Second >= Time.DayLength then
 		self:TransitionDay(currentGlobalState, previousGlobalState, config)
 	end
 	
