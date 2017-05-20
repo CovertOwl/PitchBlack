@@ -3,7 +3,7 @@ require 'Libs/PitchBlack/main'
 
 
 --On load game for first time
-script.on_init(function(data)
+script.on_init(function()
 	Main:On_Init() 
 end)
 

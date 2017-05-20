@@ -4,9 +4,7 @@ function Math.Lerp(startVal, endVal, t)
 	return (((endVal - startVal) * t) + startVal)
 end
 
-function Math.Clamp(val, minVal, Max)
-	local finalVal = val
-	
+function Math.Clamp(val, minVal, maxVal)
 	if val < minVal then
 		val = minVal
 	elseif val > maxVal then

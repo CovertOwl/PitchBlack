@@ -244,12 +244,12 @@ function Time.InitPhase(self, currentGlobalState, previousGlobalState, config)
 end
 
 --Given a state, get the variable data
-function Time.GetPhaseVariableData(self, globalState, phase, cycleOffset, config)
+function Time.GetPhaseVariableData(_, globalState, phase, cycleOffset, _)
 	LogDebug('Time.GetPhaseVariableData(' .. phase.Name .. ')')
 	
 	local lastVariableData = nil
 	
-	for index, phaseVariableDataIter in ipairs(phase.VariableData) do	
+	for _, phaseVariableDataIter in ipairs(phase.VariableData) do	
 		if (globalState.CyclesComplete + cycleOffset) < phaseVariableDataIter.CyclesComplete then
 			break
 		end
@@ -262,7 +262,7 @@ function Time.GetPhaseVariableData(self, globalState, phase, cycleOffset, config
 end
 
 --Given a state, get the variable data
-function Time.GetNextNonTransitionPhaseConfig(self, globalState, config)
+function Time.GetNextNonTransitionPhaseConfig(_, globalState, _)
 	LogDebug('Time.GetNextNonTransitionPhaseConfig()')
 
 	local phaseConfig = globalState.CycleState.CurrentPhaseConfig

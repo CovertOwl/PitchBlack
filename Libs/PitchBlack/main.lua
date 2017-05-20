@@ -36,7 +36,7 @@ DefaultGlobalData = {
 
 Main = {}
 
-function Main.On_Tick(self)
+function Main.On_Tick(_)
 	global.Data.ElapsedTicksOfSecond = global.Data.ElapsedTicksOfSecond + 1
 	global.Data.TotalElapsedTicks = global.Data.TotalElapsedTicks + 1
 
@@ -56,7 +56,7 @@ function Main.On_Tick(self)
 	end
 end
 
-function Main.On_Configuration_Changed(self, data)
+function Main.On_Configuration_Changed(self, _)
 	self:InitWorld()
 end
 
@@ -95,7 +95,7 @@ function Main.InitWorld(self)
 end
 
 --Init a new global data
-function Main.GetNewGlobalData(self)
+function Main.GetNewGlobalData(_)
 	local newGlobalData = DeepCopy(DefaultGlobalData)
 	newGlobalData.CurrentState = DeepCopy(DefaultGlobalData.DefaultState)
 	

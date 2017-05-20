@@ -1218,7 +1218,7 @@ function Biters.Tick(self, currentState, previousState, config)
 	
 	local currentBiterState = currentState.BiterState
 	local currentPhaseState = currentBiterState.CurrentPhaseState
-	local currentPhaseConfig = currentPhaseState.CurrentPhase
+	--local currentPhaseConfig = currentPhaseState.CurrentPhase
 	local currentPhaseVarData = currentPhaseState.CurrentPhaseVarData
 
 	LogDebug('Permanent Evolution: ' .. currentBiterState.PermanentEvolution .. ', TempNightEvolution: ' .. currentBiterState.TempNightEvolution .. ', Phase: ' .. currentPhaseVarData.Name)
@@ -1246,7 +1246,7 @@ function Biters.StartNewPhase(self, currentState, previousState, config)
 	local totalPhaseWeight = 0
 	
 	--Iterate through all phases looking for valid start phases
-	for index,biterPhaseIter in ipairs(Biters.Phases) do
+	for _,biterPhaseIter in ipairs(Biters.Phases) do
 		LogDebug('Phase: ' .. biterPhaseIter.Name)
 	
 		--If phase not active, or active but not same as current iteration, or is same but can repeat
@@ -1259,7 +1259,7 @@ function Biters.StartNewPhase(self, currentState, previousState, config)
 			--If valid start phase var data found
 			if newPhaseVarData ~= nil then
 				--Get phase weight
-				local phaseWeight = 0
+				local phaseWeight
 				if currentState.CycleState.IsDay then
 					phaseWeight = newPhaseVarData.DayChanceWeight
 				else
@@ -1314,7 +1314,7 @@ function Biters.StartNewPhase(self, currentState, previousState, config)
 	--currentPhaseState.TotalDurationSeconds = 8
 	
 	currentPhaseState.RemainingDurationSeconds = currentPhaseState.TotalDurationSeconds
-	currentPhaseState.EvolutionStart = game.evolution_factor	
+	currentPhaseState.EvolutionStart = game.forces.enemy.evolution_factor	
 	
 	LogInfo('Chosen phase:' .. currentPhaseState.CurrentPhase.Name .. ', Duration: ' .. currentPhaseState.TotalDurationSeconds .. ', StartEvolution: ' .. currentPhaseState.EvolutionStart)
 	
@@ -1369,14 +1369,14 @@ function Biters.StartNewPhase(self, currentState, previousState, config)
 	if isRepeat == false
 	then
 		--Add start warning messages
-		for index,currentMessage in ipairs(currentPhaseState.CurrentPhase.StartWarnings) do		
+		for _,currentMessage in ipairs(currentPhaseState.CurrentPhase.StartWarnings) do		
 			table.insert(currentPhaseState.Messages, {Message = currentMessage, Delay = messageCounter})
 		end		
 		messageCounter = messageCounter + messageGroupBuffer
 		
 		--Add extra start warning messages
 		if currentPhaseState.CurrentPhaseVarData.StartExtraWarnings ~= nil then
-			for index,currentMessage in ipairs(currentPhaseState.CurrentPhaseVarData.StartExtraWarnings) do		
+			for _,currentMessage in ipairs(currentPhaseState.CurrentPhaseVarData.StartExtraWarnings) do		
 				table.insert(currentPhaseState.Messages, {Message = currentMessage, Delay = messageCounter})
 			end			
 			
@@ -1386,7 +1386,7 @@ function Biters.StartNewPhase(self, currentState, previousState, config)
 	else
 		--Add continue warning messages
 		if currentPhaseState.CurrentPhase.ContinueWarnings ~= nil then
-			for index,currentMessage in ipairs(currentPhaseState.CurrentPhase.ContinueWarnings) do		
+			for _,currentMessage in ipairs(currentPhaseState.CurrentPhase.ContinueWarnings) do		
 				table.insert(currentPhaseState.Messages, {Message = currentMessage, Delay = messageCounter})
 			end
 			
@@ -1395,7 +1395,7 @@ function Biters.StartNewPhase(self, currentState, previousState, config)
 		
 		--Add continue start warning messages
 		if currentPhaseState.CurrentPhaseVarData.ContinueExtraWarnings ~= nil then
-			for index,currentMessage in ipairs(currentPhaseState.CurrentPhaseVarData.ContinueExtraWarnings) do		
+			for _,currentMessage in ipairs(currentPhaseState.CurrentPhaseVarData.ContinueExtraWarnings) do		
 				table.insert(currentPhaseState.Messages, {Message = currentMessage, Delay = messageCounter})
 			end
 			
@@ -1405,23 +1405,23 @@ function Biters.StartNewPhase(self, currentState, previousState, config)
 	
 	--Add hint messages
 	if currentPhaseState.CurrentPhase.HintWarnings ~= nil then 
-		for index,currentMessage in ipairs(currentPhaseState.CurrentPhase.HintWarnings) do		
+		for _,currentMessage in ipairs(currentPhaseState.CurrentPhase.HintWarnings) do		
 			table.insert(currentPhaseState.Messages, {Message = currentMessage, Delay = messageCounter})
 		end
 			
-		messageCounter = messageCounter + messageGroupBuffer
+		--messageCounter = messageCounter + messageGroupBuffer
 	end	
 	
 	LogDebug('Exit Biters.StartNewPhase()')
 end
 
 --Update the biter evolution
-function Biters.UpdateEvolution(self, currentState, previousState, config)
+function Biters.UpdateEvolution(_, currentState, _, config)
 	LogDebug('Biters.UpdateEvolution()')
 	
 	local currentBiterState = currentState.BiterState
 	local currentBiterPhaseState = currentBiterState.CurrentPhaseState
-	local currentBiterPhase = currentBiterPhaseState.CurrentPhase
+	--local currentBiterPhase = currentBiterPhaseState.CurrentPhase
 	local currentBiterPhaseVarData = currentBiterPhaseState.CurrentPhaseVarData
 	
 	local scaleEvolutionRate =  config.ScaleEvolutionRate
@@ -1429,7 +1429,7 @@ function Biters.UpdateEvolution(self, currentState, previousState, config)
 	local permamnentEvolutionRate = 0.0
 	
 	--Iterate through permanent evolution scale rates to find the current one
-	for index,scalePair in ipairs(currentBiterState.PermamnentEvolutionRates) do
+	for _,scalePair in ipairs(currentBiterState.PermamnentEvolutionRates) do
 		if currentBiterState.PermanentEvolution < scalePair[1] then
 			permamnentEvolutionRate = scalePair[2]
 			break
@@ -1462,10 +1462,10 @@ function Biters.UpdateEvolution(self, currentState, previousState, config)
 	evolutionDelta = evolutionDelta + currentBiterPhaseVarData.MapSettings.enemy_evolution.time_factor
 	
 	--Set game evolution
-	game.evolution_factor = math.max(game.evolution_factor + (evolutionDelta * scaleEvolutionRate), currentBiterState.PermanentEvolution)
+	game.forces.enemy.evolution_factor = math.max(game.forces.enemy.evolution_factor + (evolutionDelta * scaleEvolutionRate), currentBiterState.PermanentEvolution)
 	
 	LogDebug(
-	'Evolution: ' .. game.evolution_factor 
+	'Evolution: ' .. game.forces.enemy.evolution_factor 
 	.. ', PermanentEvolution: ' .. currentBiterState.PermanentEvolution 
 	.. ', TempNightEvolution: ' .. currentBiterState.TempNightEvolution)
 	
@@ -1488,7 +1488,7 @@ function Biters.UpdatePhase(self, currentState, previousState, config)
 	--Display messages
 	local messageRemoveCount = 0	
 	if currentPhaseState.Messages ~= nil then	
-		for index,currentMessage in ipairs(currentPhaseState.Messages) do			
+		for _,currentMessage in ipairs(currentPhaseState.Messages) do			
 			if currentMessage.Delay > secondsElapsed then
 				break
 			end
@@ -1503,7 +1503,7 @@ function Biters.UpdatePhase(self, currentState, previousState, config)
 		LogDebug('Popping ' .. messageRemoveCount .. ' messages')
 	
 		--Remove displayed messages
-		for i=1, messageRemoveCount do
+		for _=1, messageRemoveCount do
 			table.remove(currentPhaseState.Messages, 1)
 		end
 	end
@@ -1530,10 +1530,10 @@ function Biters.UpdatePhase(self, currentState, previousState, config)
 	
 		--If was night
 		if previousState.CycleState.IsDay == false then
-			local evolutionDelta = game.evolution_factor - currentPhaseState.EvolutionStart
+			local evolutionDelta = game.forces.enemy.evolution_factor - currentPhaseState.EvolutionStart
 			local tempEvolution = evolutionDelta - (evolutionDelta * currentPhaseVarData.EvolutionRetainedAfterNight)
 			
-			LogDebug('Evolution: ' .. game.evolution_factor .. ', TempEvolutionForPhase: ' .. tempEvolution)
+			LogDebug('Evolution: ' .. game.forces.enemy.evolution_factor .. ', TempEvolutionForPhase: ' .. tempEvolution)
 		
 			currentBiterState.TempNightEvolution = currentBiterState.TempNightEvolution + tempEvolution
 		end
@@ -1545,7 +1545,7 @@ function Biters.UpdatePhase(self, currentState, previousState, config)
 end
 
 --Return a valid phase if biter phase can start given current conditions
-function Biters.GetValidStartPhaseVarData(self, biterPhaseState, biterPhase, currentState, previousState, config)
+function Biters.GetValidStartPhaseVarData(self, _, biterPhase, currentState, previousState, config)
 	LogDebug('Biters.GetValidStartPhaseVarData(' .. biterPhase.Name .. ')')
 
 	local transitionToDay = false
@@ -1558,7 +1558,7 @@ function Biters.GetValidStartPhaseVarData(self, biterPhaseState, biterPhase, cur
 	LogDebug('Transition to day & night: ' .. tostring(transitionToDay) .. ', ' .. tostring(transitionToNight))
 
 	--Iterate through each var phase data
-	for index,biterPhaseVarDataIter in ipairs(biterPhase.VariableData) do
+	for _,biterPhaseVarDataIter in ipairs(biterPhase.VariableData) do
 		LogDebug('Iter: ' .. biterPhaseVarDataIter.Name)
 		
 		local dayWeightChance = (currentState.CycleState.IsDay == true and biterPhaseVarDataIter.DayChanceWeight > 0.0)
@@ -1600,9 +1600,9 @@ function Biters.GetValidStartPhaseVarData(self, biterPhaseState, biterPhase, cur
 			--Check evolution condition
 			local evolutionConditionActive = biterPhaseVarDataIter.Cond_MinEvolution > -1.0 or biterPhaseVarDataIter.Cond_MaxEvolution > -1.0
 			local evolutionCondition = 
-				(biterPhaseVarDataIter.Cond_MinEvolution <= -1.0 or biterPhaseVarDataIter.Cond_MinEvolution <= game.evolution_factor)
+				(biterPhaseVarDataIter.Cond_MinEvolution <= -1.0 or biterPhaseVarDataIter.Cond_MinEvolution <= game.forces.enemy.evolution_factor)
 				and
-				(biterPhaseVarDataIter.Cond_MaxEvolution <= -1.0 or biterPhaseVarDataIter.Cond_MaxEvolution >= game.evolution_factor)
+				(biterPhaseVarDataIter.Cond_MaxEvolution <= -1.0 or biterPhaseVarDataIter.Cond_MaxEvolution >= game.forces.enemy.evolution_factor)
 				
 			--Check brightness condition
 			local brightnessConditionActive = biterPhaseVarDataIter.Cond_MinBrightness > -1.0 or biterPhaseVarDataIter.Cond_MaxBrightness > -1.0
@@ -1664,24 +1664,24 @@ function Biters.GetValidStartPhaseVarData(self, biterPhaseState, biterPhase, cur
 end
 
 --Checks, given current conditions, whether a phase is due to break
-function Biters.CanPhaseBreak(self, biterState, biterPhaseConfig, biterPhaseVarData, currentState, previousState, config)
+function Biters.CanPhaseBreak(_, biterState, _, biterPhaseVarData, currentState, _, _)
 	LogDebug('Biters.CanPhaseBreak(' .. biterPhaseVarData.Name .. ')')
 	
 	--Check evolution range break
 	local breakMinEvolution = 
 		biterPhaseVarData.MinEvolutionBreak > -1.0
-		and game.evolution_factor < biterPhaseVarData.MinEvolutionBreak
+		and game.forces.enemy.evolution_factor < biterPhaseVarData.MinEvolutionBreak
 	local breakMaxEvolution = 
 		biterPhaseVarData.MaxEvolutionBreak > -1.0
-		and game.evolution_factor > biterPhaseVarData.MaxEvolutionBreak
+		and game.forces.enemy.evolution_factor > biterPhaseVarData.MaxEvolutionBreak
 	
 	--Check evolution delta break
 	local breakEvolutionDelta = false	
 	if biterState ~= nil and biterPhaseVarData.EvolutionDeltaBreak > -1.0 and biterPhaseVarData.EvolutionDeltaBreak ~= 0.0 then
 		if biterPhaseVarData.EvolutionDeltaBreak > 0.0 then
-			breakEvolutionDelta = game.evolution_factor > biterState.EvolutionStart + biterPhaseVarData.EvolutionDeltaBreak
+			breakEvolutionDelta = game.forces.enemy.evolution_factor > biterState.EvolutionStart + biterPhaseVarData.EvolutionDeltaBreak
 		else
-			breakEvolutionDelta = game.evolution_factor < biterState.EvolutionStart + biterPhaseVarData.EvolutionDeltaBreak
+			breakEvolutionDelta = game.forces.enemy.evolution_factor < biterState.EvolutionStart + biterPhaseVarData.EvolutionDeltaBreak
 		end
 	end
 	
