@@ -1,6 +1,8 @@
-# PitchBlack
+PitchBlack
+===========
 
-###Intro
+Intro
+---
 
 Survival is now far more difficult as the Biters play the relentless alien wildlife truly hellbent on overwhelming you.
 Spend your daylight wisely as the biters remain largely dormant unless provoked. But even a daytime provocation is nothing compared to the swarm that awakens at sunset.
@@ -12,18 +14,22 @@ Biter behavior comes in phases, where they will be more passive during the dayti
 
 Keep an eye out for warnings on how to deal with their immediate threat.
 
-###Mod settings
+Mod settings
+---
 
 There are ingame settings to change the difficulty (Options -> Mods -> Startup / Map)
 For descriptions hover over the names
 
-###Complimenting Mods
+Complimenting Mods
+---
 
 Increased Rates - https://mods.factorio.com/mods/reapa/IncreasedRates
 Armageddon - https://mods.factorio.com/mods/binbinhfr/Armageddon
 Rampant AI - https://mods.factorio.com/mods/Veden/Rampant
 
-###Versions
+Versions
+---
+
 0.2.0
 
  - Update for 0.15
