@@ -29,6 +29,9 @@ Rampant AI - https://mods.factorio.com/mods/Veden/Rampant
 
 Versions
 ---
+0.2.1
+
+ - fixed debugMode being always true after game start
 
 0.2.0
 

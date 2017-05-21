@@ -97,7 +97,7 @@ function Logger.new(mod_name, log_name, debug_mode, options)
     return Logger
 end
 
-pbLogger = Logger.new("PB", "main", settings.global["pitch-DebugMode"])
+pbLogger = Logger.new("PB", "main", settings.global["pitch-DebugMode"].value)
 function LogDebug(msg)
 	if (pbLogger.debug_mode) then
 		LogMessage('<Debug> ' .. msg)
