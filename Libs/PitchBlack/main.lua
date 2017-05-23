@@ -48,8 +48,8 @@ function Main.On_Tick(_)
 		global.Data.PreviousState = DeepCopy(global.Data.CurrentState)
 
 		--Update mod
-		Time:Tick(global.Data.CurrentState, global.Data.PreviousState, Config)
-		Biters:Tick(global.Data.CurrentState, global.Data.PreviousState, Config)
+		Time:Tick(global.Data.CurrentState, global.Data.PreviousState)
+		Biters:Tick(global.Data.CurrentState, global.Data.PreviousState)
 		
 		--Commit update to game state
 		LogDebug('End Main Tick')
@@ -88,8 +88,8 @@ function Main.InitWorld(self)
 	end
 	
 	--Init other modules
-	Time:Init(global.Data.CurrentState, Config)
-  Biters:Init(global.Data.CurrentState, Config)
+	Time:Init(global.Data.CurrentState)
+  Biters:Init(global.Data.CurrentState)
 	
 	LogDebug('Main.InitWorld()')
 end

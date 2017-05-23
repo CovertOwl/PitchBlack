@@ -4,11 +4,7 @@ require 'Libs/Utility/logger'
 function MessageAll(s)
 	LogDebug('Messaging all: ' .. s)
 
-	for _, player in pairs(game.players) do
-		if player.connected then
-			player.print(s)
-		end
-	end
+	game.print(s)
 end
 
 function DeepCopy(orig)

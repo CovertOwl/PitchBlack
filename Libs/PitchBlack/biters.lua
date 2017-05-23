@@ -1185,7 +1185,7 @@ Biters.Phases =
 }
 
 --Called when the mod changes/is added for first time
-function Biters.Init(self, globalState, config)	
+function Biters.Init(self, globalState)	
 	LogDebug('Biters.Init()')
 	
 	--Ingame evolution time is silly and doesnt work properly methinks
@@ -1196,7 +1196,7 @@ function Biters.Init(self, globalState, config)
 		LogDebug('Cycle state is old! Starting a new one...')
 	
 		globalState.BiterState = DeepCopy(Biters.DefaultState)
-		self:StartNewPhase(globalState, nil, config)
+		self:StartNewPhase(globalState)
 	end
 	
 	if globalState.BiterState == nil then
@@ -1204,7 +1204,7 @@ function Biters.Init(self, globalState, config)
 		LogDebug('Cycle state does not exist! Starting a new one...')
 	
 		globalState.BiterState = DeepCopy(Biters.DefaultState)
-		self:StartNewPhase(globalState, nil, config)
+		self:StartNewPhase(globalState)
 	end
 	
 	LogInfo('Starting with Biters - ' .. globalState.BiterState.Name)
@@ -1213,7 +1213,7 @@ function Biters.Init(self, globalState, config)
 end
 
 --Called each mod tick (every 1 sec)
-function Biters.Tick(self, currentState, previousState, config)
+function Biters.Tick(self, currentState, previousState)
 	LogDebug('Biters.Tick()')
 	
 	local currentBiterState = currentState.BiterState
@@ -1223,15 +1223,15 @@ function Biters.Tick(self, currentState, previousState, config)
 
 	LogDebug('Permanent Evolution: ' .. currentBiterState.PermanentEvolution .. ', TempNightEvolution: ' .. currentBiterState.TempNightEvolution .. ', Phase: ' .. currentPhaseVarData.Name)
 		
-	self:UpdatePhase(currentState, previousState, config)
+	self:UpdatePhase(currentState, previousState)
 	
-	self:UpdateEvolution(currentState, previousState, config)
+	self:UpdateEvolution(currentState, previousState)
 	
 	LogDebug('Exit Biters.Tick()')
 end
 
 --Called when beginning a new phase
-function Biters.StartNewPhase(self, currentState, previousState, config)
+function Biters.StartNewPhase(self, currentState, previousState)
 	LogDebug('Biters.StartNewPhase()')
 
 	local currentBiterPhaseState = currentState.BiterState.CurrentPhaseState
@@ -1254,7 +1254,7 @@ function Biters.StartNewPhase(self, currentState, previousState, config)
 		or currentBiterPhase.Name ~= biterPhaseIter.Name
 		or currentBiterPhaseVarData.CanRepeat == true
 		then
-			local newPhaseVarData = self:GetValidStartPhaseVarData(currentBiterPhaseState, biterPhaseIter, currentState, previousState, config)
+			local newPhaseVarData = self:GetValidStartPhaseVarData(currentBiterPhaseState, biterPhaseIter, currentState, previousState)
 			
 			--If valid start phase var data found
 			if newPhaseVarData ~= nil then
@@ -1474,7 +1474,7 @@ function Biters.UpdateEvolution(_, currentState, _, _)
 end
 
 --Update biter phase
-function Biters.UpdatePhase(self, currentState, previousState, config)
+function Biters.UpdatePhase(self, currentState, previousState)
 	LogDebug('Biters.UpdatePhase()')
 
 	local currentBiterState = currentState.BiterState
@@ -1517,7 +1517,7 @@ function Biters.UpdatePhase(self, currentState, previousState, config)
 		transitionToNight = (previousState.CycleState.IsDay == true and currentState.CycleState.IsDay ~= true)
 	end
 	local phaseExpired = currentPhaseState.RemainingDurationSeconds <= 0
-	local phaseBreak = self:CanPhaseBreak(currentPhaseState, currentPhaseConfig, currentPhaseVarData, currentState, previousState, config) == true
+	local phaseBreak = self:CanPhaseBreak(currentPhaseState, currentPhaseConfig, currentPhaseVarData, currentState, previousState) == true
 	
 	LogDebug(
 			'transitionToDay: ' .. tostring(transitionToDay) ..
@@ -1539,14 +1539,14 @@ function Biters.UpdatePhase(self, currentState, previousState, config)
 			currentBiterState.TempNightEvolution = currentBiterState.TempNightEvolution + tempEvolution
 		end
 		
-		self:StartNewPhase(currentState, previousState, config)
+		self:StartNewPhase(currentState, previousState)
 	end
 	
 	LogDebug('Exit Biters.UpdatePhase()')
 end
 
 --Return a valid phase if biter phase can start given current conditions
-function Biters.GetValidStartPhaseVarData(self, _, biterPhase, currentState, previousState, config)
+function Biters.GetValidStartPhaseVarData(self, _, biterPhase, currentState, previousState)
 	LogDebug('Biters.GetValidStartPhaseVarData(' .. biterPhase.Name .. ')')
 
 	local transitionToDay = false
@@ -1566,7 +1566,7 @@ function Biters.GetValidStartPhaseVarData(self, _, biterPhase, currentState, pre
 		local nightWeightChance = (currentState.CycleState.IsDay == false and biterPhaseVarDataIter.NightChanceWeight > 0.0)
 		local dayStartValid = (transitionToDay == false or biterPhaseVarDataIter.DayStartPhase == true)
 		local nightStartValid = (transitionToNight == false or biterPhaseVarDataIter.NightStartPhase == true)
-		local canBreak = self:CanPhaseBreak(nil, biterPhase, biterPhaseVarDataIter, currentState, previousState, config) == true
+		local canBreak = self:CanPhaseBreak(nil, biterPhase, biterPhaseVarDataIter, currentState, previousState) == true
 	
 		LogDebug(
 			'dayWeightChance: ' .. tostring(dayWeightChance) ..

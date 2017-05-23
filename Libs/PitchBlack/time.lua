@@ -161,14 +161,14 @@ Time.DawnPhaseConfig =
 }
 	
 --Called when the mod changes/is added for first time
-function Time.Init(self, globalState, config)
+function Time.Init(self, globalState)
 	LogDebug('Time.Init()')
 	
 	if globalState.CycleState == nil then
 		LogDebug('Cycle state does not exist! Starting a new one...')
 	
 		globalState.CycleState = DeepCopy(Time.DefaultState)
-		self:StartDay(globalState, nil, config)
+		self:StartDay(globalState)
 	end
 	
 	LogInfo('Starting with Time - ' .. globalState.CycleState.Name)
@@ -177,7 +177,7 @@ function Time.Init(self, globalState, config)
 end
 
 --Called on every phase as it begins
-function Time.InitPhase(self, currentGlobalState, previousGlobalState, config)
+function Time.InitPhase(self, currentGlobalState, previousGlobalState)
 	LogDebug('Time.InitPhase()')	
 	
 	local currentCycleState = currentGlobalState.CycleState
@@ -211,8 +211,8 @@ function Time.InitPhase(self, currentGlobalState, previousGlobalState, config)
 		LogDebug('Is transition phase.')
 	
 		--Determine transition-to cycle
-		currentCycleState.NextNonTransitionPhaseConfig = self:GetNextNonTransitionPhaseConfig(currentGlobalState, config)
-		currentCycleState.NextNonTransitionPhaseVarData = self:GetPhaseVariableData(currentGlobalState, currentCycleState.NextNonTransitionPhaseConfig, 1, config)
+		currentCycleState.NextNonTransitionPhaseConfig = self:GetNextNonTransitionPhaseConfig(currentGlobalState)
+		currentCycleState.NextNonTransitionPhaseVarData = self:GetPhaseVariableData(currentGlobalState, currentCycleState.NextNonTransitionPhaseConfig, 1)
 		
 		--Set transition brightness, which is last phase brightness to next phase brightness
 		local minBrightness = currentCycleState.NextNonTransitionPhaseVarData.MinBrightness
@@ -244,7 +244,7 @@ function Time.InitPhase(self, currentGlobalState, previousGlobalState, config)
 end
 
 --Given a state, get the variable data
-function Time.GetPhaseVariableData(_, globalState, phase, cycleOffset, _)
+function Time.GetPhaseVariableData(_, globalState, phase, cycleOffset)
 	LogDebug('Time.GetPhaseVariableData(' .. phase.Name .. ')')
 	
 	local lastVariableData = nil
@@ -262,7 +262,7 @@ function Time.GetPhaseVariableData(_, globalState, phase, cycleOffset, _)
 end
 
 --Given a state, get the variable data
-function Time.GetNextNonTransitionPhaseConfig(_, globalState, _)
+function Time.GetNextNonTransitionPhaseConfig(_, globalState)
 	LogDebug('Time.GetNextNonTransitionPhaseConfig()')
 
 	local phaseConfig = globalState.CycleState.CurrentPhaseConfig
@@ -279,7 +279,7 @@ function Time.GetNextNonTransitionPhaseConfig(_, globalState, _)
 end
 	
 --Start phase day in the current global state
-function Time.StartDay(self, currentGlobalState, previousGlobalState, config)
+function Time.StartDay(self, currentGlobalState, previousGlobalState)
 	LogDebug('Time.StartDay()')
 
 	local currentCycleState = currentGlobalState.CycleState
@@ -302,48 +302,48 @@ function Time.StartDay(self, currentGlobalState, previousGlobalState, config)
 	--This should only occur during init
 	else
 		currentCycleState.CurrentPhaseConfig = Time.DayPhaseConfig
-		currentCycleState.CurrentPhaseVarData = self:GetPhaseVariableData(currentGlobalState, currentCycleState.CurrentPhaseConfig, 0, config)
+		currentCycleState.CurrentPhaseVarData = self:GetPhaseVariableData(currentGlobalState, currentCycleState.CurrentPhaseConfig, 0)
 		
 		LogDebug('Start day with new phase & data: ' .. currentCycleState.CurrentPhaseConfig.Name .. ', ' .. currentCycleState.CurrentPhaseVarData.Name)
 	end
 	
-	self:InitPhase(currentGlobalState, previousGlobalState, config)
+	self:InitPhase(currentGlobalState, previousGlobalState)
 	
 	LogDebug('Exit Time.StartDay()')
 end
 
 --Start phase dusk in the current global state
-function Time.StartDusk(self, currentGlobalState, previousGlobalState, config)
+function Time.StartDusk(self, currentGlobalState, previousGlobalState)
 	LogDebug('Time.StartDusk()')
 	
 	local cycleState = currentGlobalState.CycleState
 	cycleState.CurrentPhaseConfig = Time.DuskPhaseConfig
-	cycleState.CurrentPhaseVarData = self:GetPhaseVariableData(currentGlobalState, cycleState.CurrentPhaseConfig, 0, config)
+	cycleState.CurrentPhaseVarData = self:GetPhaseVariableData(currentGlobalState, cycleState.CurrentPhaseConfig, 0)
 	
 	LogDebug('Start dusk with new phase & data: ' .. cycleState.CurrentPhaseConfig.Name .. ', ' .. cycleState.CurrentPhaseVarData.Name)
 	
-	self:InitPhase(currentGlobalState, previousGlobalState, config)
+	self:InitPhase(currentGlobalState, previousGlobalState)
 	
 	LogDebug('Exit Time.StartDusk()')
 end
 
 --Start phase dawn in the current global state
-function Time.StartDawn(self, currentGlobalState, previousGlobalState, config)
+function Time.StartDawn(self, currentGlobalState, previousGlobalState)
 	LogDebug('Time.StartDawn()')
 	
 	local cycleState = currentGlobalState.CycleState
 	cycleState.CurrentPhaseConfig = Time.DawnPhaseConfig
-	cycleState.CurrentPhaseVarData = self:GetPhaseVariableData(currentGlobalState, cycleState.CurrentPhaseConfig, 0, config)
+	cycleState.CurrentPhaseVarData = self:GetPhaseVariableData(currentGlobalState, cycleState.CurrentPhaseConfig, 0)
 	
 	LogDebug('Start dawn with new phase & data: ' .. cycleState.CurrentPhaseConfig.Name .. ', ' .. cycleState.CurrentPhaseVarData.Name)
 	
-	self:InitPhase(currentGlobalState, previousGlobalState, config)
+	self:InitPhase(currentGlobalState, previousGlobalState)
 	
 	LogDebug('Exit Time.StartDawn()')
 end
 
 --Start phase night in the current global state
-function Time.StartNight(self, currentGlobalState, previousGlobalState, config)
+function Time.StartNight(self, currentGlobalState, previousGlobalState)
 	LogDebug('Time.StartNight()')
 	
 	local currentCycleState = currentGlobalState.CycleState
@@ -366,23 +366,23 @@ function Time.StartNight(self, currentGlobalState, previousGlobalState, config)
 	--This should only occur during init
 	else
 		currentCycleState.CurrentPhaseConfig = Time.NightPhaseConfig
-		currentCycleState.CurrentPhaseVarData = self:GetPhaseVariableData(currentGlobalState, currentCycleState.CurrentPhaseConfig, 0, config)
+		currentCycleState.CurrentPhaseVarData = self:GetPhaseVariableData(currentGlobalState, currentCycleState.CurrentPhaseConfig, 0)
 		
 		LogDebug('Start night with new phase & data: ' .. currentCycleState.CurrentPhaseConfig.Name .. ', ' .. currentCycleState.CurrentPhaseVarData.Name)
 	end
 	
-	self:InitPhase(currentGlobalState, previousGlobalState, config)
+	self:InitPhase(currentGlobalState, previousGlobalState)
 	
 	LogDebug('Exit Time.StartNight()')
 end
 
 --Called each mod tick (every 1 sec)
-function Time.Tick(self, currentGlobalState, previousGlobalState, config)
+function Time.Tick(self, currentGlobalState, previousGlobalState)
 	LogDebug('Time.Tick()')
 	
 	LogDebug('CyclesComplete: ' .. currentGlobalState.CyclesComplete .. ', Total Days: ' .. currentGlobalState.TotalDays .. ', Day: ' .. currentGlobalState.Day .. ', Second: ' .. currentGlobalState.Second)
 	
-	self:TransitionSecond(currentGlobalState, previousGlobalState, config)
+	self:TransitionSecond(currentGlobalState, previousGlobalState)
 	
 	local currentCycleState = currentGlobalState.CycleState
 	local previousCycleState = previousGlobalState.CycleState
@@ -407,20 +407,20 @@ function Time.Tick(self, currentGlobalState, previousGlobalState, config)
 end
 
 --Called at the end of a second
-function Time.TransitionSecond(self, currentGlobalState, previousGlobalState, config)
+function Time.TransitionSecond(self, currentGlobalState, previousGlobalState)
 	LogDebug('Time.TransitionSecond()')
 	
 	currentGlobalState.Second = currentGlobalState.Second + 1
 
 	if currentGlobalState.Second >= Time.DayLength then
-		self:TransitionDay(currentGlobalState, previousGlobalState, config)
+		self:TransitionDay(currentGlobalState, previousGlobalState)
 	end
 	
 	LogDebug('Exit Time.TransitionSecond()')
 end
 
 --Called when the current day finishes
-function Time.TransitionDay(self, currentGlobalState, previousGlobalState, config)
+function Time.TransitionDay(self, currentGlobalState, previousGlobalState)
 	LogDebug('Time.TransitionDay()')
 	
 	--Update global state
@@ -436,37 +436,37 @@ function Time.TransitionDay(self, currentGlobalState, previousGlobalState, confi
 	if currentCycleState.PhaseDaysComplete >= currentCycleState.PhaseDuration then		
 		LogDebug('Phase time expired.')
 	
-		self:TransitionPhase(currentGlobalState, previousGlobalState, config)
+		self:TransitionPhase(currentGlobalState, previousGlobalState)
 	end
 	
 	LogDebug('Exit Time.TransitionDay()')
 end
 
 --Called when the current phase finishes
-function Time.TransitionPhase(self, currentGlobalState, previousGlobalState, config)
+function Time.TransitionPhase(self, currentGlobalState, previousGlobalState)
 	LogDebug('Time.TransitionPhase()')
 	
 	local previousPhaseConfig = previousGlobalState.CycleState.CurrentPhaseConfig
 	
 	--If Day
 	if previousPhaseConfig.PhaseIndex == Time.DayPhaseIndex then
-		self:StartDusk(currentGlobalState, previousGlobalState, config)
+		self:StartDusk(currentGlobalState, previousGlobalState)
 	--If Dusk
 	elseif previousPhaseConfig.PhaseIndex == Time.DuskPhaseIndex then
-		self:StartNight(currentGlobalState, previousGlobalState, config)
+		self:StartNight(currentGlobalState, previousGlobalState)
 	--If Night
 	elseif previousPhaseConfig.PhaseIndex == Time.NightPhaseIndex then
-		self:StartDawn(currentGlobalState, previousGlobalState, config)
+		self:StartDawn(currentGlobalState, previousGlobalState)
 	--If Dawn
 	else
-		self:TransitionCycle(currentGlobalState, previousGlobalState, config)
+		self:TransitionCycle(currentGlobalState, previousGlobalState)
 	end
 	
 	LogDebug('Exit Time.TransitionPhase()')
 end
 
 --Called when the current cycle finishes
-function Time.TransitionCycle(self, currentGlobalState, previousGlobalState, config)
+function Time.TransitionCycle(self, currentGlobalState, previousGlobalState)
 	LogDebug('Time.TransitionCycle()')
 	
 	LogInfo('Cycle Complete')
@@ -475,7 +475,7 @@ function Time.TransitionCycle(self, currentGlobalState, previousGlobalState, con
 	
 	currentGlobalState.Day = 0
 		
-	self:StartDay(currentGlobalState, previousGlobalState, config)
+	self:StartDay(currentGlobalState, previousGlobalState)
 	
 	LogDebug('Exit Time.TransitionCycle()')
 end
