@@ -66,7 +66,6 @@ end
 
 --Run on first load of mod or when version changes
 function Main.InitWorld(self)
-  log(serpent.block(game.active_mods))
   game.map_settings.pollution.ageing = 0.75
   --workaround to work with any 0.15 version
   if game.active_mods["base"] and game.active_mods['base'] >= '0.15.13' then
