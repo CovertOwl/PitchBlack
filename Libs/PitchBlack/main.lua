@@ -67,7 +67,7 @@ end
 --Run on first load of mod or when version changes
 function Main.InitWorld(self)
   game.map_settings.pollution.ageing = 0.75
-  game.surfaces[1].freeze_daytime(true)
+  game.surfaces[1].freeze_daytime = true
 
   --Look for existing data, if none... swap it over
   if global.Data == nil then
