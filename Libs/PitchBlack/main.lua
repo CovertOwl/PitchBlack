@@ -66,8 +66,14 @@ end
 
 --Run on first load of mod or when version changes
 function Main.InitWorld(self)
+  log(serpent.block(game.active_mods))
   game.map_settings.pollution.ageing = 0.75
-  game.surfaces[1].freeze_daytime = true
+  --workaround to work with any 0.15 version
+  if game.active_mods["base"] and game.active_mods['base'] >= '0.15.13' then
+    game.surfaces[1].freeze_daytime = true
+  else
+    game.surfaces[1].freeze_daytime()
+  end
 
   --Look for existing data, if none... swap it over
   if global.Data == nil then
