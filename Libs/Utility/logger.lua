@@ -97,22 +97,22 @@ function Logger.new(mod_name, log_name, debug_mode, options)
     return Logger
 end
 
-pbLogger = Logger.new("PB", "main", settings.global["pitch-DebugMode"].value)
-function LogDebug(msg)
+pbLogger = Logger.new("PB", "main", settings.global["pitch-DebugMode"].value) --luacheck: allow defined top
+function LogDebug(msg) --luacheck: allow defined top
 	if (pbLogger.debug_mode) then
 		LogMessage('<Debug> ' .. msg)
 	end
 end
 
-function LogInfo(msg)
+function LogInfo(msg) --luacheck: allow defined top
 	LogMessage('<Info> ' .. msg)
 end
 
-function LogError(msg)
+function LogError(msg) --luacheck: allow defined top
 	LogMessage('<Error> ' .. msg)
 end
 
-function LogMessage(msg)	
+function LogMessage(msg) --luacheck: allow defined top
 	pbLogger.log('<GT-' .. game.tick .. ', ET-' .. global.Data.TotalElapsedTicks .. '> ' .. msg)
 end
 

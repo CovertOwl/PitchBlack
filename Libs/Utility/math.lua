@@ -1,4 +1,4 @@
-Math = {}
+Math = {} --luacheck: allow defined top
 
 function Math.Lerp(startVal, endVal, t)
 	return (((endVal - startVal) * t) + startVal)

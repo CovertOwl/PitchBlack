@@ -1,8 +1,8 @@
 require 'Libs/Utility/math'
 
 --Increase all pollution
-for key, prototype_type in pairs(data.raw) do
-  for name, prototype in pairs(prototype_type) do
+for _, prototype_type in pairs(data.raw) do
+  for _, prototype in pairs(prototype_type) do
     if prototype.energy_source then
       if prototype.energy_source.emissions and prototype.energy_source.emissions > 0.001 then
         prototype.energy_source.emissions = prototype.energy_source.emissions * 10

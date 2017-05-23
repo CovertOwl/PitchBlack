@@ -1,13 +1,13 @@
 require 'Libs/Utility/math'
 require 'Libs/Utility/logger'
 
-function MessageAll(s)
+function MessageAll(s) --luacheck: allow defined top
 	LogDebug('Messaging all: ' .. s)
 
 	game.print(s)
 end
 
-function DeepCopy(orig)
+function DeepCopy(orig) --luacheck: allow defined top
     local orig_type = type(orig)
     local copy
     if orig_type == 'table' then
@@ -21,7 +21,7 @@ function DeepCopy(orig)
     return copy
 end
 
-function SetBrightness(scalar)
+function SetBrightness(scalar) --luacheck: allow defined top
 	--Lerp between day (0.5 = noon) and night (0.0 = midnight)
 	game.surfaces.nauvis.daytime = Math.Lerp(0.42, 0.25, scalar)
 end
