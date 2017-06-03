@@ -1193,7 +1193,7 @@ function Biters.Init(self, globalState)
 
   if globalState.BiterState ~= nil and globalState.BiterState.Name ~= Biters.DefaultState.Name then
 
-    LogDebug('Cycle state is old! Starting a new one...')
+    LogInfo('Cycle state is old! Starting a new one...')
 
     globalState.BiterState = DeepCopy(Biters.DefaultState)
     self:StartNewPhase(globalState)
@@ -1201,7 +1201,7 @@ function Biters.Init(self, globalState)
 
   if globalState.BiterState == nil then
 
-    LogDebug('Cycle state does not exist! Starting a new one...')
+    LogInfo('Cycle state does not exist! Starting a new one...')
 
     globalState.BiterState = DeepCopy(Biters.DefaultState)
     self:StartNewPhase(globalState)
@@ -1285,13 +1285,14 @@ function Biters.StartNewPhase(self, currentState, previousState)
   local newBiterPhaseIndex = nil
   local currentWeightChance = 0
   local randWeight = math.random() * totalPhaseWeight
-  LogDebug('randWeight ' .. randWeight)
+  LogInfo('Total weight: ' .. totalPhaseWeight)
+  LogInfo('randWeight ' .. randWeight)
 
   --Pick a phase to start at random
   for index,iterBiterPhase in ipairs(validPhaseData) do
     currentWeightChance = currentWeightChance + iterBiterPhase.Weight
 
-    LogDebug('Phase: ' .. iterBiterPhase.Config.Name .. ', CurrentWeight: ' .. currentWeightChance)
+    LogInfo('Phase: ' .. iterBiterPhase.Config.Name .. ', CurrentWeight: ' .. currentWeightChance)
 
     if randWeight <= currentWeightChance then
       newBiterPhaseIndex = index

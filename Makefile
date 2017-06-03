@@ -37,7 +37,7 @@ clean:
 	rm -rf build/
 
 verify:
-	luacheck . --exclude-files factorio_mods/ --exclude-files build/ --exclude-files data*.lua --exclude-files prototypes/ --globals game global remote serpent bit32 defines script table string util log commands data settings Time pbLogger Main Math Logger LogDebug LogInfo LogMessage DeepCopy SetBrightness MessageAll LogError Biters DefaultGlobalData
+	luacheck .
 
 install_mod:
 	if [ -L factorio_mods ] ; \

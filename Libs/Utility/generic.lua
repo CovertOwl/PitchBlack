@@ -2,8 +2,7 @@ require 'Libs/Utility/math'
 require 'Libs/Utility/logger'
 
 function MessageAll(s) --luacheck: allow defined top
-	LogDebug('Messaging all: ' .. s)
-
+	LogInfo('Messaging all: ' .. s)
 	game.print(s)
 end
 

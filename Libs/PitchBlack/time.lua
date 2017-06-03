@@ -166,7 +166,7 @@ function Time.Init(self, globalState)
   LogDebug('Time.Init()')
 
   if globalState.CycleState == nil then
-    LogDebug('Cycle state does not exist! Starting a new one...')
+    LogInfo('Cycle state does not exist! Starting a new one...')
 
     globalState.CycleState = DeepCopy(Time.DefaultState)
     self:StartDay(globalState)

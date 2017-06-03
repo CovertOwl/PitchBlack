@@ -30,6 +30,10 @@ Rampant AI - https://mods.factorio.com/mods/Veden/Rampant
 Versions
 ---
 
+0.2.3
+
+ - minor logging changes
+
 0.2.2
 
  - updated for Factorio 0.15.13, should still work with 0.15.12
