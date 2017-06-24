@@ -16,19 +16,19 @@ end)
 --local max = 0
 --local triggered = false
 script.on_event(defines.events.on_tick, function(event)
---    local count
---    for _, name in pairs(smoke) do
---        count = game.surfaces.nauvis.count_entities_filtered{type="smoke"}
---        if count > max then max = count end
---        if count and count > 0 then
---            if not triggered then triggered = true end
---            log(string.format("%s: %s", name, count))
---        end
---        if count == 0 and triggered then
---            log("max: " .. max)
---            triggered = false
---        end
---    end
+    --    local count
+    --    for _, name in pairs(smoke) do
+    --        count = game.surfaces.nauvis.count_entities_filtered{type="smoke"}
+    --        if count > max then max = count end
+    --        if count and count > 0 then
+    --            if not triggered then triggered = true end
+    --            log(string.format("%s: %s", name, count))
+    --        end
+    --        if count == 0 and triggered then
+    --            log("max: " .. max)
+    --            triggered = false
+    --        end
+    --    end
     Main:On_Tick(event)
 end)
 
@@ -43,4 +43,11 @@ script.on_event(defines.events.on_runtime_mod_setting_changed, function(event)
         Time.DayPhaseConfig.VariableData[1].MinLength = settings.global["pitch-FirstDayPhaseLength"].value
         Time.DayPhaseConfig.VariableData[1].MaxLength = settings.global["pitch-FirstDayPhaseLength"].value
     end
+end)
+
+script.on_event(defines.events.on_player_died, function(event)
+    local _, _ = pcall(function()
+        local player = game.players[event.player_index]
+        player.surface.create_entity({name = "pitch_explosion", position=player.position})
+    end)
 end)

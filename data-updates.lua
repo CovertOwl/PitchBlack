@@ -68,9 +68,60 @@ if settings.startup["pitch-disableSmoke"].value then
     data.raw.fire["fire-flame-on-tree"].smoke = nil
 end
 
-data.raw["utility-sounds"]["default"]["game_lost"] =
+data:extend({
     {
+        type = "explosion",
+        name = "pitch_explosion",
+        flags = {"not-on-map"},
+        animations = {
+            {
+                filename = "__Pitch_Black__/trans1.png",
+                priority = "extra-high",
+                width = 1,
+                height = 1,
+                frame_count = 1,
+                animation_speed = 0.5
+            },
+            {
+                filename = "__Pitch_Black__/trans1.png",
+                priority = "extra-high",
+                width = 1,
+                height = 1,
+                frame_count = 1,
+                animation_speed = 0.5
+            },
+            {
+                filename = "__Pitch_Black__/trans1.png",
+                priority = "extra-high",
+                width = 1,
+                height = 1,
+                frame_count = 1,
+                animation_speed = 0.5
+            },
+            {
+                filename = "__Pitch_Black__/trans1.png",
+                priority = "extra-high",
+                width = 1,
+                height = 1,
+                frame_count = 1,
+                animation_speed = 0.5
+            }
+        },
+        light = {intensity = 0, size = 20, color = {r=1.0, g=1.0, b=1.0}},
+        sound =
         {
-            filename = '__Pitch_Black__/scream.ogg'
+            aggregation =
+            {
+                max_count = 1,
+                remove = true
+            },
+            variations =
+            {
+                {
+                    filename = '__Pitch_Black__/scream.ogg',
+                    volume = 1
+                }
+            }
         }
     }
+})
