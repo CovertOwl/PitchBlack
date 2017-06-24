@@ -30,6 +30,11 @@ Rampant AI - https://mods.factorio.com/mods/Veden/Rampant
 Versions
 ---
 
+0.2.4
+
+ - added option for flamethrower/flamethrower turret to not create smoke entities. Might help with lots and lots of Flamethrower turrets
+ - something is screaming
+
 0.2.3
 
  - minor logging changes

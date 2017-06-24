@@ -61,12 +61,19 @@ data:extend{
     --Default: 1 (100%)
     --Note: To make the enemies easier, use a smaller value. To make them harder, use a higher value.
     --ValType: Floating point
-    EnemySwarmScale = 1.0,
+    --EnemySwarmScale = 1.0,
     type = "double-setting",
     name = "pitch-EnemySwarmScale",
     setting_type = "startup",
     default_value = 1,
     minimum_value = 0.0001,
     order = "pitch-a[EnemySwarmScale]-b"
+  },
+  {
+    type = "bool-setting",
+    name = "pitch-disableSmoke",
+    setting_type = "startup",
+    default_value = true,
+    order = "pitch-z[disableSmoke]-a"
   }
 }
