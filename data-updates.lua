@@ -23,12 +23,18 @@ end
 
 local EnemyHealthScale = settings.startup["pitch-EnemyHealthScale"].value
 local EnemySwarmScale = settings.startup["pitch-EnemySwarmScale"].value
+local BiterDamageScale = settings.startup["pitch-BiterDamageScale"].value
+local SpitterDamageScale = settings.startup["pitch-SpitterDamageScale"].value
+local EnemyMovementScale = settings.startup["pitch-EnemyMovementScale"].value
 
 --Spawners spawn more and more frequently
 for _, prototype in pairs(data.raw["unit-spawner"]) do
     prototype.max_count_of_owned_units = math.ceil(6 * EnemySwarmScale)
     prototype.max_friends_around_to_spawn = math.ceil(8 * EnemySwarmScale)
 end
+
+local biters = {'small-biter', 'medium-biter', 'big-biter', 'behemoth-biter'}
+local spitters = {'small-spitter', 'medium-spitter', 'big-spitter', 'behemoth-spitter'}
 
 --Biters have more HP and join the attack more rapidly if you're polluting too much
 data.raw["unit"]["small-biter"].pollution_to_join_attack = math.ceil(133 * (1.0 / EnemySwarmScale))			--Default 200
@@ -47,6 +53,40 @@ data.raw["unit"]["big-spitter"].pollution_to_join_attack = math.ceil(2666 * (1.0
 data.raw["unit"]["big-spitter"].max_health = math.ceil(375 * EnemyHealthScale)								--Default 200
 data.raw["unit"]["behemoth-spitter"].pollution_to_join_attack = math.ceil(6650 * (1.0 / EnemySwarmScale))	--Default 10000
 data.raw["unit"]["behemoth-spitter"].max_health = math.ceil(2000 * EnemyHealthScale)							--Default 2000
+
+for _, name in pairs(biters) do
+    data.raw["unit"][name].attack_parameters.ammo_type.action.action_delivery.target_effects.damage.amount =
+        math.ceil(data.raw["unit"][name].attack_parameters.ammo_type.action.action_delivery.target_effects.damage.amount * BiterDamageScale)
+    data.raw["unit"][name].movement_speed = data.raw["unit"][name].movement_speed * EnemyMovementScale
+    data.raw["unit"][name].distance_per_frame = data.raw["unit"][name].distance_per_frame * EnemyMovementScale
+end
+
+for _, name in pairs(spitters) do
+    data.raw["unit"][name].attack_parameters.damage_modifier =
+        math.ceil(data.raw["unit"][name].attack_parameters.damage_modifier * SpitterDamageScale)
+    data.raw["unit"][name].movement_speed = data.raw["unit"][name].movement_speed * EnemyMovementScale
+    data.raw["unit"][name].distance_per_frame = data.raw["unit"][name].distance_per_frame * EnemyMovementScale
+end
+
+local speed = math.min(SpitterDamageScale, BiterDamageScale)
+if speed ~= 1 then
+    data.raw["repair-tool"]["repair-pack"].speed = data.raw["repair-tool"]["repair-pack"].speed * speed * 0.9
+    log(string.format("repair speed: %s", data.raw["repair-tool"]["repair-pack"].speed))
+end
+if settings.startup["pitch-addResistances"].value then
+    for i, name in pairs(biters) do
+        if not data.raw["unit"][name].resistances then
+            data.raw["unit"][name].resistances = {}
+        end
+        table.insert(data.raw["unit"][name].resistances, {type = "fire", percent = 10*(i-1) + 5})
+    end
+    for i, name in pairs(spitters) do
+        if not data.raw["unit"][name].resistances then
+            data.raw["unit"][name].resistances = {}
+        end
+        table.insert(data.raw["unit"][name].resistances, {type = "fire", percent = 10*(i-1) + 5})
+    end
+end
 
 if settings.startup["pitch-disableSmoke"].value then
     --    data.raw['utility-sounds']['default']['alert_damage'] = {

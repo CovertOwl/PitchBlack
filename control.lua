@@ -8,6 +8,16 @@ end)
 
 --On mod version different or if mod did not previously exist
 script.on_configuration_changed(function(data)
+    if data.mod_changes and data.mod_changes.Pitch_Black then
+        if not data.mod_changes.Pitch_Black.old_version or data.mod_changes.Pitch_Black.old_version < '0.2.5' then
+            if settings.global["pitch-BiterDamageModifier"] then
+                game.forces.enemy.set_ammo_damage_modifier('melee', settings.global["pitch-BiterDamageModifier"].value)
+            end
+            if settings.global["pitch-SpitterDamageModifier"] then
+                game.forces.enemy.set_ammo_damage_modifier('biological', settings.global["pitch-SpitterDamageModifier"].value)
+            end
+        end
+    end
     Main:On_Configuration_Changed(data)
 end)
 
@@ -33,15 +43,28 @@ script.on_event(defines.events.on_tick, function(event)
 end)
 
 script.on_event(defines.events.on_runtime_mod_setting_changed, function(event)
-    if event.setting == "pitch-DebugMode" then
-        pbLogger.debug_mode = settings.global["pitch-DebugMode"].value
-    end
-    if event.setting == "pitch-DayLength" then
-        Time.DayLength = settings.global["pitch-DayLength"].value
-    end
-    if event.setting == "pitch-FirstDayPhaseLength" then
-        Time.DayPhaseConfig.VariableData[1].MinLength = settings.global["pitch-FirstDayPhaseLength"].value
-        Time.DayPhaseConfig.VariableData[1].MaxLength = settings.global["pitch-FirstDayPhaseLength"].value
+    local _, err = pcall(function()
+        if event.setting == "pitch-DebugMode" then
+            pbLogger.debug_mode = settings.global["pitch-DebugMode"].value
+        end
+        if event.setting == "pitch-DayLength" then
+            Time.DayLength = settings.global["pitch-DayLength"].value
+        end
+        if event.setting == "pitch-FirstDayPhaseLength" then
+            Time.DayPhaseConfig.VariableData[1].MinLength = settings.global["pitch-FirstDayPhaseLength"].value
+            Time.DayPhaseConfig.VariableData[1].MaxLength = settings.global["pitch-FirstDayPhaseLength"].value
+        end
+
+        if event.setting == "pitch-BiterDamageModifier" then
+            game.forces.enemy.set_ammo_damage_modifier('melee', settings.global["pitch-BiterDamageModifier"].value)
+        end
+        if event.setting == "pitch-SpitterDamageModifier" then
+            game.forces.enemy.set_ammo_damage_modifier('biological', settings.global["pitch-SpitterDamageModifier"].value)
+        end
+    end)
+    if err then
+        game.print("Pitch Black: Error occured, see log")
+        log(serpent.block(err))
     end
 end)
 

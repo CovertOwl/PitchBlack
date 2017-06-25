@@ -1,0 +1,15 @@
+--local biters = {'small-biter', 'medium-biter', 'big-biter', 'behemoth-biter'}
+--local spitters = {'small-spitter', 'medium-spitter', 'big-spitter', 'behemoth-spitter'}
+--
+--for _, name in pairs(biters) do
+--    log(name)
+--    log(serpent.block(data.raw["unit"][name].attack_parameters.ammo_type.action.action_delivery.target_effects.damage.amount))
+--    log(serpent.block(data.raw["unit"][name].resistances))
+--end
+--for _, name in pairs(spitters) do
+--    log(name)
+--    log(serpent.block(data.raw["unit"][name].attack_parameters.ammo_type))
+--    log(serpent.block(data.raw["unit"][name].resistances))
+--end
+--log(serpent.block(data.raw.projectile["acid-projectile-purple"].action.action_delivery.target_effects[3]))
+--log(serpent.block(data.raw.wall["stone-wall"].resistances))
