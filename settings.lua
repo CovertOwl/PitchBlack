@@ -40,7 +40,7 @@ data:extend{
         name = "pitch-BiterDamageModifier",
         setting_type = "runtime-global",
         default_value = 0,
-        minimum_value = 0,
+        minimum_value = -0.9,
         order = "pitch-a[ScaleEvolutionRate]-d"
     },
     {
@@ -48,7 +48,7 @@ data:extend{
         name = "pitch-SpitterDamageModifier",
         setting_type = "runtime-global",
         default_value = 0,
-        minimum_value = 0,
+        minimum_value = -0.9,
         order = "pitch-a[ScaleEvolutionRate]-d"
     },
     {
@@ -68,7 +68,7 @@ data:extend{
         type = "double-setting",
         name = "pitch-EnemyHealthScale",
         setting_type = "startup",
-        default_value = 1,
+        default_value = 2.75,
         minimum_value = 0.0001,
         order = "pitch-a[EnemyHealthScale]-a"
     },
@@ -89,7 +89,7 @@ data:extend{
         type = "double-setting",
         name = "pitch-BiterDamageScale",
         setting_type = "startup",
-        default_value = 1,
+        default_value = 2.5,
         minimum_value = 0.0001,
         order = "pitch-b[BiterDamage]-a"
     },
@@ -97,7 +97,7 @@ data:extend{
         type = "double-setting",
         name = "pitch-SpitterDamageScale",
         setting_type = "startup",
-        default_value = 1,
+        default_value = 2,
         minimum_value = 0.0001,
         order = "pitch-b[SpitterDamage]-b"
     },

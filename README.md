@@ -29,7 +29,11 @@ Rampant AI - https://mods.factorio.com/mods/Veden/Rampant
 
 Versions
 ---
+0.2.5
 
+ - added startup settings to: add fire resistance to biters, increase biter/spitter damage(default to *2.5 for biters. *2 for spitters), increase movement speed
+ - added map settings to: add bonus to biter/spitter damage
+ 
 0.2.4
 
  - added option for flamethrower/flamethrower turret to not create smoke entities. Might help with lots and lots of Flamethrower turrets
