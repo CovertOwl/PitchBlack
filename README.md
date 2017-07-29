@@ -32,7 +32,8 @@ Versions
 0.2.6
 
  - added settings to change fire resistance for biters and spitters
-
+ - send messages about biter activity changes, phases to ChatToFile
+ 
 0.2.5
 
  - added startup settings to: add fire resistance to biters, increase biter/spitter damage(default to *2.5 for biters. *2 for spitters), increase movement speed

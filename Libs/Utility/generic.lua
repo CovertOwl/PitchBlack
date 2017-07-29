@@ -4,6 +4,9 @@ require 'Libs/Utility/logger'
 function MessageAll(s) --luacheck: allow defined top
 	LogInfo('Messaging all: ' .. s)
 	game.print(s)
+	if remote.interfaces.ChatToFile and remote.interfaces.ChatToFile.chat then --luacheck: ignore
+        remote.call("ChatToFile", "chat", s)
+    end
 end
 
 function DeepCopy(orig) --luacheck: allow defined top
