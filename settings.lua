@@ -124,3 +124,32 @@ data:extend{
         order = "pitch-z[disableSmoke]-a"
     }
 }
+
+local biters = {'small-biter', 'medium-biter', 'big-biter', 'behemoth-biter'}
+local spitters = {'small-spitter', 'medium-spitter', 'big-spitter', 'behemoth-spitter'}
+
+for i, name in pairs(biters) do
+    data:extend({
+        {
+            type = "double-setting",
+            name = "pitch-" .. name .. "-resistance",
+            setting_type = "startup",
+            default_value = 10*(i-1) + 5,
+            minimum_value = 0,
+            order = "pitch-d[addResistances]-a-" .. i
+        },
+    })
+end
+
+for i, name in pairs(spitters) do
+    data:extend({
+        {
+            type = "double-setting",
+            name = "pitch-" .. name .. "-resistance",
+            setting_type = "startup",
+            default_value = 10*(i-1) + 5,
+            minimum_value = 0,
+            order = "pitch-d[addResistances]-b-" .. i
+        },
+    })
+end

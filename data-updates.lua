@@ -36,6 +36,14 @@ end
 local biters = {'small-biter', 'medium-biter', 'big-biter', 'behemoth-biter'}
 local spitters = {'small-spitter', 'medium-spitter', 'big-spitter', 'behemoth-spitter'}
 
+local resistances = {}
+for _, name in pairs(biters) do
+    resistances[name] = settings.startup["pitch-" .. name .. "-resistance"].value
+end
+for _, name in pairs(spitters) do
+    resistances[name] = settings.startup["pitch-" .. name .. "-resistance"].value
+end
+
 --Biters have more HP and join the attack more rapidly if you're polluting too much
 data.raw["unit"]["small-biter"].pollution_to_join_attack = math.ceil(133 * (1.0 / EnemySwarmScale))			--Default 200
 data.raw["unit"]["small-biter"].max_health = math.ceil(10 * EnemyHealthScale)								--Default 15
@@ -59,6 +67,12 @@ for _, name in pairs(biters) do
         math.ceil(data.raw["unit"][name].attack_parameters.ammo_type.action.action_delivery.target_effects.damage.amount * BiterDamageScale)
     data.raw["unit"][name].movement_speed = data.raw["unit"][name].movement_speed * EnemyMovementScale
     data.raw["unit"][name].distance_per_frame = data.raw["unit"][name].distance_per_frame * EnemyMovementScale
+    if settings.startup["pitch-addResistances"].value then
+        if not data.raw["unit"][name].resistances then
+            data.raw["unit"][name].resistances = {}
+        end
+        table.insert(data.raw["unit"][name].resistances, {type = "fire", percent = resistances[name]})
+    end
 end
 
 for _, name in pairs(spitters) do
@@ -66,42 +80,21 @@ for _, name in pairs(spitters) do
         math.ceil(data.raw["unit"][name].attack_parameters.damage_modifier * SpitterDamageScale)
     data.raw["unit"][name].movement_speed = data.raw["unit"][name].movement_speed * EnemyMovementScale
     data.raw["unit"][name].distance_per_frame = data.raw["unit"][name].distance_per_frame * EnemyMovementScale
+    if settings.startup["pitch-addResistances"].value then
+        if not data.raw["unit"][name].resistances then
+            data.raw["unit"][name].resistances = {}
+        end
+        table.insert(data.raw["unit"][name].resistances, {type = "fire", percent = resistances[name]})
+    end
 end
 
 local speed = math.min(SpitterDamageScale, BiterDamageScale)
 if speed ~= 1 then
     data.raw["repair-tool"]["repair-pack"].speed = data.raw["repair-tool"]["repair-pack"].speed * speed * 0.9
-    log(string.format("repair speed: %s", data.raw["repair-tool"]["repair-pack"].speed))
-end
-if settings.startup["pitch-addResistances"].value then
-    for i, name in pairs(biters) do
-        if not data.raw["unit"][name].resistances then
-            data.raw["unit"][name].resistances = {}
-        end
-        table.insert(data.raw["unit"][name].resistances, {type = "fire", percent = 10*(i-1) + 5})
-    end
-    for i, name in pairs(spitters) do
-        if not data.raw["unit"][name].resistances then
-            data.raw["unit"][name].resistances = {}
-        end
-        table.insert(data.raw["unit"][name].resistances, {type = "fire", percent = 10*(i-1) + 5})
-    end
+    --log(string.format("repair speed: %s", data.raw["repair-tool"]["repair-pack"].speed))
 end
 
 if settings.startup["pitch-disableSmoke"].value then
-    --    data.raw['utility-sounds']['default']['alert_damage'] = {
-    --        {
-    --            filename = '__Pitch_Black__/scream.ogg'
-    --        }
-    --    }
-    --local spitters = {'small-biter', 'medium-biter', 'big-biter', 'behemoth-biter', 'small-spitter', 'medium-spitter', 'big-spitter', 'behemoth-spitter'}
-    --for _, biter in pairs(spitters) do
-    --    if data.raw.unit[biter] then
-    --        data.raw.unit[biter].dying_sound[1].filename = '__Pitch_Black__/scream.ogg'
-    --        data.raw.unit[biter].dying_sound[1].volume = 1
-    --        log(serpent.block(data.raw.unit[biter].attack_parameters.sound))
-    --    end
-    --end
     data.raw.stream["flamethrower-fire-stream"].smoke_sources = nil
     data.raw.fire["fire-flame"].on_fuel_added_action = nil
     data.raw.fire["fire-flame"].smoke = nil

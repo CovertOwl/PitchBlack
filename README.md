@@ -29,6 +29,10 @@ Rampant AI - https://mods.factorio.com/mods/Veden/Rampant
 
 Versions
 ---
+0.2.6
+
+ - added settings to change fire resistance for biters and spitters
+
 0.2.5
 
  - added startup settings to: add fire resistance to biters, increase biter/spitter damage(default to *2.5 for biters. *2 for spitters), increase movement speed
