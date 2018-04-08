@@ -5,55 +5,149 @@ require 'Libs/PitchBlack/time'
 
 --Global data table to be used when a new cycle begins or when no cycle exists
 DefaultGlobalData = { --luacheck: allow defined top
-  DefaultState =
-  {
-    --Total number of cycles completed
-    CyclesComplete = 0,
-    --Total number of days completed
-    TotalDays = 0,
+	DefaultState =
+	{
+		--Total number of cycles completed
+		CyclesComplete = 0,
+		--Total number of days completed
+		TotalDays = 0,
 
-    --Elapsed days for the cycle
-    Day = 0,
-    --Elapsed seconds for the day
-    Second = 0
-  },
+		--Elapsed days for the cycle
+		Day = 0,
+		--Elapsed seconds for the day
+		Second = 0
+	},
 
-  --Some meta
-  Name = 'HelloWorld',
-  Title = 'Hello World',
-  Version = '0.0.4',
+	--Some meta
+	Name = 'HelloWorld',
+	Title = 'Hello World',
+	Version = '0.0.4',
 
-  --Total elapsed ticks for the current second
-  ElapsedTicksOfSecond = 0,
+	--Total elapsed ticks for the current second
+	ElapsedTicksOfSecond = 0,
 
-  --Total elapsed ticks
-  TotalElapsedTicks = 0,
+	--Total elapsed ticks
+	TotalElapsedTicks = 0,
 
-  --Current & Previous DefaultGlobalData.DefaultState
-  PreviousState = nil,
-  CurrentState = nil
+	--Current & Previous DefaultGlobalData.DefaultState
+	PreviousState = nil,
+	CurrentState = nil,  
+  
+	AllPollutionHarmables = nil,
+	AllPollutionHarmablesIter = 1
 }
 
-Main = {} --luacheck: allow defined top
+Main = 
+{
+} --luacheck: allow defined top
 
 function Main.On_Tick(_)
-  global.Data.ElapsedTicksOfSecond = global.Data.ElapsedTicksOfSecond + 1
-  global.Data.TotalElapsedTicks = global.Data.TotalElapsedTicks + 1
+	local ticksPerSecond = 60
+	global.Data.ElapsedTicksOfSecond = global.Data.ElapsedTicksOfSecond + 1
+	global.Data.TotalElapsedTicks = global.Data.TotalElapsedTicks + 1
 
-  if global.Data.ElapsedTicksOfSecond >= 60 then
-    LogDebug('Start Main Tick')
-    global.Data.ElapsedTicksOfSecond = 0
+	if global.Data.ElapsedTicksOfSecond >= ticksPerSecond then
+		LogDebug('Start Main Tick')
+		global.Data.ElapsedTicksOfSecond = 0
 
-    --Transition simple state
-    global.Data.PreviousState = DeepCopy(global.Data.CurrentState)
+		--Transition simple state
+		global.Data.PreviousState = DeepCopy(global.Data.CurrentState)
 
-    --Update mod
-    Time:Tick(global.Data.CurrentState, global.Data.PreviousState)
-    Biters:Tick(global.Data.CurrentState, global.Data.PreviousState)
+		--Update mod
+		Time:Tick(global.Data.CurrentState, global.Data.PreviousState)
+		Biters:Tick(global.Data.CurrentState, global.Data.PreviousState)
 
-    --Commit update to game state
-    LogDebug('End Main Tick')
-  end
+		--Commit update to game state
+		LogDebug('End Main Tick')
+	end
+  
+	--Apply pollution harmables damage, 100 per tick
+	local brightness = GetBrightness()
+	local minBrightnessMinPollutionDamage = 0.2
+	local minPollutionDamagePerSecond = 2
+	local maxPollutionDamagePerSecond = 20
+	local maxPollutionPerSecond = 8000 	--Linear scale damage 
+	local pollutionDamageScales = 
+	{
+		{Max = 0, Scale = 0.05},
+		{Max = 500, Scale = 0.1},
+		{Max = 3000, Scale = 0.4},
+		{Max = 5000, Scale = 0.7},
+		{Max = maxPollutionPerSecond, Scale = 1.0}
+	}
+  
+	if (brightness > 0.1) then
+		local iterCount = 0
+		while true do
+			if (iterCount > 99) then 
+				break 
+			end
+			
+			iterCount = iterCount + 1
+			pollutionHarmable = global.Data.AllPollutionHarmables[global.Data.AllPollutionHarmablesIter]
+			if (global.Data.AllPollutionHarmablesIter <= #global.Data.AllPollutionHarmables and pollutionHarmable) then
+				if (pollutionHarmable.LastTick < 0) then
+					pollutionHarmable.LastTick = global.Data.TotalElapsedTicks
+				end
+				
+				local secondsSinceUpdate = (global.Data.TotalElapsedTicks - pollutionHarmable.LastTick) / ticksPerSecond
+				pollutionHarmable.LastTick = global.Data.TotalElapsedTicks
+				
+				if (pollutionHarmable.Harmable.valid) then
+					LogDebug('Polluting: ' .. global.Data.AllPollutionHarmablesIter);
+				
+					local pollution = game.surfaces.nauvis.get_pollution(pollutionHarmable.Harmable.position)
+					local pollutionClamped = Math.Clamp(pollution, 0, maxPollutionPerSecond - 1)
+					
+					local minPol = 0
+					local minScale = 0
+					local polScale = 0
+					
+					if (pollution > 0) then				
+						for _,pollutionDamageScale in ipairs(pollutionDamageScales) do
+							if (pollutionClamped >= pollutionDamageScale.Max) then
+								minPol = pollutionDamageScale.Max
+								minScale = pollutionDamageScale.Scale
+							else				
+								polScale = Math.Lerp(minScale, pollutionDamageScale.Scale, (pollutionClamped - minPol) / (pollutionDamageScale.Max - minPol))
+								
+								break
+							end
+						end
+					
+						local damageScaled = maxPollutionDamagePerSecond * brightness * secondsSinceUpdate * polScale
+						local minDamageBrightness = Math.Clamp(brightness, 0, minBrightnessMinPollutionDamage)
+						local minDamage = Math.Lerp(0, minPollutionDamagePerSecond, minDamageBrightness / minBrightnessMinPollutionDamage) * secondsSinceUpdate
+						
+						if (damageScaled < minDamage) then
+							damageScaled = minDamage
+						end
+						
+						if (damageScaled > 0) then							
+							LogDebug('D: ' .. damageScaled
+							.. ', DPS: ' .. maxPollutionDamagePerSecond
+							.. ', P: ' .. pollution
+							.. ', BR: ' .. brightness
+							.. ', T: ' .. secondsSinceUpdate
+							.. ', P: ' .. polScale
+							
+							)
+						end
+						
+						pollutionHarmable.Harmable.damage(damageScaled, "enemy")
+					end
+
+					global.Data.AllPollutionHarmablesIter = global.Data.AllPollutionHarmablesIter + 1	
+				else
+					LogDebug('Removing: ' .. global.Data.AllPollutionHarmablesIter);
+					table.remove(global.Data.AllPollutionHarmables, global.Data.AllPollutionHarmablesIter)
+				end			
+			else
+				--LogDebug('Restarting from: ' .. global.Data.AllPollutionHarmablesIter);
+				global.Data.AllPollutionHarmablesIter = 1
+			end
+		end
+	end
 end
 
 function Main.On_Configuration_Changed(self, _)
@@ -83,6 +177,19 @@ function Main.InitWorld(self)
   else
     LogDebug('Current global data already exists! -  "' .. global.Data.Name
       .. 'v' .. global.Data.Version .. '".')
+  end 
+  
+  if (global.Data.AllPollutionHarmables == nil) then
+	  --Discover all Harmables that can be harmed
+	  local biterHarmables = game.surfaces[1].find_entities_filtered{type= "unit-spawner"}
+	  global.Data.AllPollutionHarmables = {}
+	  global.Data.AllPollutionHarmablesIter = 1  
+	  for i,biterHarmableIter in ipairs(biterHarmables) do  
+		global.Data.AllPollutionHarmables[i] = {
+			LastTick = -1,
+			Harmable = biterHarmableIter
+		}
+	  end
   end
 
   --If old mod exists
@@ -105,4 +212,15 @@ function Main.GetNewGlobalData(_)
   newGlobalData.CurrentState = DeepCopy(DefaultGlobalData.DefaultState)
 
   return newGlobalData
+end
+
+function Main.On_BiterBuild(_, event)
+	local base = event.entity
+	if base.type == "unit-spawner" then
+		global.Data.AllPollutionHarmables[#global.Data.AllPollutionHarmables + 1] = {
+			LastTick = -1,
+			Harmable = base
+		}
+		return
+	end
 end

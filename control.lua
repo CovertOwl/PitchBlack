@@ -42,6 +42,12 @@ script.on_event(defines.events.on_tick, function(event)
     Main:On_Tick(event)
 end)
 
+script.on_event(defines.events.on_biter_base_built, 
+	function(event)
+		Main:On_BiterBuild(event)
+	end
+)
+
 script.on_event(defines.events.on_runtime_mod_setting_changed, function(event)
     local _, err = pcall(function()
         if event.setting == "pitch-DebugMode" then
@@ -74,3 +80,11 @@ script.on_event(defines.events.on_player_died, function(event)
         player.surface.create_entity({name = "pitch_explosion", position=player.position})
     end)
 end)
+
+remote.add_interface("PitchBlack", 
+{
+	SkipTimePhase = 
+	function() 
+		Time.SkipPhase()
+	end
+})

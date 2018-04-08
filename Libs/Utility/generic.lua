@@ -27,3 +27,7 @@ function SetBrightness(scalar) --luacheck: allow defined top
 	--Lerp between day (0.5 = noon) and night (0.0 = midnight)
 	game.surfaces.nauvis.daytime = Math.Lerp(0.42, 0.25, scalar)
 end
+
+function GetBrightness()
+	return 1.0 - ((game.surfaces.nauvis.daytime - 0.25) / (0.42 - 0.25))
+end

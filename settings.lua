@@ -1,4 +1,25 @@
 data:extend{
+	{
+        --Desc: Max evolution value
+        --Default: 100 (100%)
+        type = "int-setting",
+        name = "pitch-MaxEvolution",
+        setting_type = "runtime-global",
+        default_value = 100,
+        minimum_value = 0,
+        order = "pitch-a[MaxEvolution]-a"
+    },
+	{
+        --Desc: Biter expansion scale
+        --Default: 100 (100%)
+        type = "int-setting",
+        name = "pitch-ExpansionScale",
+        setting_type = "runtime-global",
+        default_value = 100,
+        minimum_value = 0,
+        maximum_value = 100,
+        order = "pitch-a[ExpansionScale]-a"
+    },
     {
         --Desc: Number of real seconds in a game day
         --Default: 600 (10 minutes)

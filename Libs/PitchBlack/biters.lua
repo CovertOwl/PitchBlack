@@ -1321,44 +1321,54 @@ function Biters.StartNewPhase(self, currentState, previousState)
 
   --Apply phase map settings
   local newMapSettings = currentPhaseState.CurrentPhaseVarData.MapSettings
-
+  
   --Apply time settings
   --game.map_settings.enemy_evolution.time_factor = newMapSettings.enemy_evolution.time_factor
   local scale = settings.global["pitch-ScaleEvolutionRate"].value
+  local expansionScale = settings.global["pitch-ExpansionScale"].value
+  if expansionScale > 0 then
+	expansionScale = 100 / expansionScale
+  end
+  
   game.map_settings.enemy_evolution.destroy_factor = newMapSettings.enemy_evolution.destroy_factor * scale
   game.map_settings.enemy_evolution.pollution_factor = newMapSettings.enemy_evolution.pollution_factor * scale
 
   --Apply expansion settings
-  game.map_settings.enemy_expansion.enabled 						= newMapSettings.enemy_expansion.enabled
-  game.map_settings.enemy_expansion.building_coefficient 			= newMapSettings.enemy_expansion.building_coefficient
+  game.map_settings.enemy_expansion.enabled 					= newMapSettings.enemy_expansion.enabled
+  game.map_settings.enemy_expansion.building_coefficient 		= newMapSettings.enemy_expansion.building_coefficient
   game.map_settings.enemy_expansion.max_expansion_distance 		= newMapSettings.enemy_expansion.max_expansion_distance
-  game.map_settings.enemy_expansion.min_player_base_distance 		= newMapSettings.enemy_expansion.min_player_base_distance
-  game.map_settings.enemy_expansion.min_base_spacing				= newMapSettings.enemy_expansion.min_base_spacing
-  game.map_settings.enemy_expansion.min_expansion_cooldown 		= newMapSettings.enemy_expansion.min_expansion_cooldown
-  game.map_settings.enemy_expansion.max_expansion_cooldown 		= newMapSettings.enemy_expansion.max_expansion_cooldown
+  --game.map_settings.enemy_expansion.min_player_base_distance	= newMapSettings.enemy_expansion.min_player_base_distance
+  --game.map_settings.enemy_expansion.min_base_spacing			= newMapSettings.enemy_expansion.min_base_spacing
+  
+  if expansionScale > 0 then
+	game.map_settings.enemy_expansion.min_expansion_cooldown 	= newMapSettings.enemy_expansion.min_expansion_cooldown * expansionScale
+	game.map_settings.enemy_expansion.max_expansion_cooldown 	= newMapSettings.enemy_expansion.max_expansion_cooldown * expansionScale
+  else
+	game.map_settings.enemy_expansion.enabled 					= false
+  end
   game.map_settings.enemy_expansion.settler_group_min_size 		= newMapSettings.enemy_expansion.settler_group_min_size
   game.map_settings.enemy_expansion.settler_group_max_size 		= newMapSettings.enemy_expansion.settler_group_max_size
 
   --Apply unit group settings
-  game.map_settings.unit_group.min_group_gathering_time 			= newMapSettings.unit_group.min_group_gathering_time
-  game.map_settings.unit_group.max_group_gathering_time 			= newMapSettings.unit_group.max_group_gathering_time
+  game.map_settings.unit_group.min_group_gathering_time 		= newMapSettings.unit_group.min_group_gathering_time
+  game.map_settings.unit_group.max_group_gathering_time 		= newMapSettings.unit_group.max_group_gathering_time
   game.map_settings.unit_group.max_wait_time_for_late_members 	= newMapSettings.unit_group.max_wait_time_for_late_members
 
-  LogDebug('enemy_evolution.time_factor - ' .. newMapSettings.enemy_evolution.time_factor
-    .. ', enemy_evolution.destroy_factor - ' .. newMapSettings.enemy_evolution.destroy_factor
-    .. ', enemy_evolution.pollution_factor - ' .. newMapSettings.enemy_evolution.pollution_factor
-    .. ', enemy_expansion.enabled - ' .. tostring(newMapSettings.enemy_expansion.enabled)
-    .. ', enemy_expansion.building_coefficient - ' .. newMapSettings.enemy_expansion.building_coefficient
-    .. ', enemy_expansion.max_expansion_distance - ' .. newMapSettings.enemy_expansion.max_expansion_distance
-    .. ', enemy_expansion.min_player_base_distance - ' .. newMapSettings.enemy_expansion.min_player_base_distance
-    .. ', enemy_expansion.min_base_spacing - ' .. newMapSettings.enemy_expansion.min_base_spacing
-    .. ', enemy_expansion.min_expansion_cooldown - ' .. newMapSettings.enemy_expansion.min_expansion_cooldown
-    .. ', enemy_expansion.max_expansion_cooldown - ' .. newMapSettings.enemy_expansion.max_expansion_cooldown
-    .. ', enemy_expansion.settler_group_min_size - ' .. newMapSettings.enemy_expansion.settler_group_min_size
-    .. ', enemy_expansion.settler_group_max_size - ' .. newMapSettings.enemy_expansion.settler_group_max_size
-    .. ', unit_group.min_group_gathering_time - ' .. newMapSettings.unit_group.min_group_gathering_time
-    .. ', unit_group.max_group_gathering_time - ' .. newMapSettings.unit_group.max_group_gathering_time
-    .. ', unit_group.max_wait_time_for_late_members - ' .. newMapSettings.unit_group.max_wait_time_for_late_members
+  LogDebug('enemy_evolution.time_factor - ' .. game.map_settings.enemy_evolution.time_factor
+    .. ', enemy_evolution.destroy_factor - ' .. game.map_settings.enemy_evolution.destroy_factor
+    .. ', enemy_evolution.pollution_factor - ' .. game.map_settings.enemy_evolution.pollution_factor
+    .. ', enemy_expansion.enabled - ' .. tostring(game.map_settings.enemy_expansion.enabled)
+    .. ', enemy_expansion.building_coefficient - ' .. game.map_settings.enemy_expansion.building_coefficient
+    .. ', enemy_expansion.max_expansion_distance - ' .. game.map_settings.enemy_expansion.max_expansion_distance
+    --.. ', enemy_expansion.min_player_base_distance - ' .. game.map_settings.enemy_expansion.min_player_base_distance
+    --.. ', enemy_expansion.min_base_spacing - ' .. game.map_settings.enemy_expansion.min_base_spacing
+    .. ', enemy_expansion.min_expansion_cooldown - ' .. game.map_settings.enemy_expansion.min_expansion_cooldown
+    .. ', enemy_expansion.max_expansion_cooldown - ' .. game.map_settings.enemy_expansion.max_expansion_cooldown
+    .. ', enemy_expansion.settler_group_min_size - ' .. game.map_settings.enemy_expansion.settler_group_min_size
+    .. ', enemy_expansion.settler_group_max_size - ' .. game.map_settings.enemy_expansion.settler_group_max_size
+    .. ', unit_group.min_group_gathering_time - ' .. game.map_settings.unit_group.min_group_gathering_time
+    .. ', unit_group.max_group_gathering_time - ' .. game.map_settings.unit_group.max_group_gathering_time
+    .. ', unit_group.max_wait_time_for_late_members - ' .. game.map_settings.unit_group.max_wait_time_for_late_members
   )
 
   currentPhaseState.Messages = {}
@@ -1427,6 +1437,7 @@ function Biters.UpdateEvolution(_, currentState, _, _)
   local currentBiterPhaseVarData = currentBiterPhaseState.CurrentPhaseVarData
 
   local scaleEvolutionRate =  settings.global["pitch-ScaleEvolutionRate"].value
+  local maxEvolution = settings.global["pitch-MaxEvolution"].value * 0.01
 
   local permamnentEvolutionRate = 0.0
 
@@ -1464,7 +1475,9 @@ function Biters.UpdateEvolution(_, currentState, _, _)
   evolutionDelta = evolutionDelta + currentBiterPhaseVarData.MapSettings.enemy_evolution.time_factor
 
   --Set game evolution
-  game.forces.enemy.evolution_factor = math.max(game.forces.enemy.evolution_factor + (evolutionDelta * scaleEvolutionRate), currentBiterState.PermanentEvolution)
+  local calculatedEvolution = math.max(game.forces.enemy.evolution_factor + (evolutionDelta * scaleEvolutionRate), currentBiterState.PermanentEvolution)
+  
+  game.forces.enemy.evolution_factor = math.min(calculatedEvolution, maxEvolution)
 
   LogDebug(
     'Evolution: ' .. game.forces.enemy.evolution_factor
