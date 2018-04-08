@@ -20,6 +20,17 @@ data:extend{
         maximum_value = 100,
         order = "pitch-a[ExpansionScale]-a"
     },
+	{
+        --Desc: Biter expansion scale
+        --Default: 100 (100%)
+        type = "double-setting",
+        name = "pitch-ScalePollutionDamage",
+        setting_type = "runtime-global",
+        default_value = 1.0,
+        minimum_value = 0.0,
+        maximum_value = 1.0,
+        order = "pitch-a[ScalePollutionDamage]-a"
+    },
     {
         --Desc: Number of real seconds in a game day
         --Default: 600 (10 minutes)

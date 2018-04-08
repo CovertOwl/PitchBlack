@@ -63,6 +63,7 @@ function Main.On_Tick(_)
   
 	--Apply pollution harmables damage, 100 per tick
 	local brightness = GetBrightness()
+	local brightnessScale = brightness * settings.global["pitch-ScalePollutionDamage"].value
 	local minBrightnessMinPollutionDamage = 0.2
 	local minPollutionDamagePerSecond = 2
 	local maxPollutionDamagePerSecond = 20
@@ -76,7 +77,7 @@ function Main.On_Tick(_)
 		{Max = maxPollutionPerSecond, Scale = 1.0}
 	}
   
-	if (brightness > 0.1) then
+	if (brightnessScale > 0.1) then
 		local iterCount = 0
 		while true do
 			if (iterCount > 99) then 
@@ -115,8 +116,8 @@ function Main.On_Tick(_)
 							end
 						end
 					
-						local damageScaled = maxPollutionDamagePerSecond * brightness * secondsSinceUpdate * polScale
-						local minDamageBrightness = Math.Clamp(brightness, 0, minBrightnessMinPollutionDamage)
+						local damageScaled = maxPollutionDamagePerSecond * brightnessScale * secondsSinceUpdate * polScale
+						local minDamageBrightness = Math.Clamp(brightnessScale, 0, minBrightnessMinPollutionDamage)
 						local minDamage = Math.Lerp(0, minPollutionDamagePerSecond, minDamageBrightness / minBrightnessMinPollutionDamage) * secondsSinceUpdate
 						
 						if (damageScaled < minDamage) then
@@ -127,7 +128,7 @@ function Main.On_Tick(_)
 							LogDebug('D: ' .. damageScaled
 							.. ', DPS: ' .. maxPollutionDamagePerSecond
 							.. ', P: ' .. pollution
-							.. ', BR: ' .. brightness
+							.. ', BR: ' .. brightnessScale
 							.. ', T: ' .. secondsSinceUpdate
 							.. ', P: ' .. polScale
 							
