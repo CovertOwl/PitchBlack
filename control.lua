@@ -3,6 +3,10 @@ require 'Libs/PitchBlack/main'
 
 --On load game for first time
 script.on_init(function()
+    for _, surface in pairs(game.surfaces) do
+        surface.peaceful_mode = true
+    end
+    log("Peaceful mode activated")
     Main:On_Init()
 end)
 
@@ -19,6 +23,18 @@ script.on_configuration_changed(function(data)
         end
     end
     Main:On_Configuration_Changed(data)
+end)
+
+local peaceful_ticks = math.floor(settings.global["pitch-FirstDayPhaseLength"].value * settings.global["pitch-DayLength"].value * 0.9)
+
+script.on_nth_tick(peaceful_ticks, function(event)
+    local _, _ = pcall(function()
+        if event.tick > 0 then
+            game.print("Peaceful mode deactivated.")
+            game.print("Test " .. event.tick .. " nth " .. event.nth_tick)
+            script.on_nth_tick(peaceful_ticks, nil)
+        end
+    end)
 end)
 
 --Called once per in-game tick
@@ -66,6 +82,19 @@ script.on_event(defines.events.on_runtime_mod_setting_changed, function(event)
         game.print("Pitch Black: Error occured, see log")
         log(serpent.block(err))
     end
+end)
+
+script.on_event(defines.events.on_entity_died, function(event)
+    local _, _ = pcall(function()
+        local entity = event.entity
+        if entity.valid then
+            local type = entity.prototype.type
+            if type == 'unit' or type == 'unit-spawner' then
+                entity.surface.peaceful_mode = false
+                script.on_event(defines.events.on_entity_died, nil)
+            end
+        end
+    end)
 end)
 
 script.on_event(defines.events.on_player_died, function(event)
