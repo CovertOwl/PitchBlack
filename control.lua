@@ -1,12 +1,13 @@
 require 'Libs/PitchBlack/main'
 
+local peaceful_ticks = math.floor(60 * settings.global["pitch-FirstDayPhaseLength"].value * settings.global["pitch-DayLength"].value * 0.9)
 
 --On load game for first time
 script.on_init(function()
     for _, surface in pairs(game.surfaces) do
         surface.peaceful_mode = true
     end
-    log("Peaceful mode activated")
+    log("Peaceful mode activated for " .. peaceful_ticks .. "ticks")
     Main:On_Init()
 end)
 
@@ -24,8 +25,6 @@ script.on_configuration_changed(function(data)
     end
     Main:On_Configuration_Changed(data)
 end)
-
-local peaceful_ticks = math.floor(settings.global["pitch-FirstDayPhaseLength"].value * settings.global["pitch-DayLength"].value * 0.9)
 
 script.on_nth_tick(peaceful_ticks, function(event)
     local _, _ = pcall(function()
