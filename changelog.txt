@@ -1,7 +1,14 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.0.2
+Date: 19. 04. 2019
+  Changes:
+    - Disabled some settings when Rampant mod is active
+  Bugfixes:
+    - Fixed startup error with Rampant
+---------------------------------------------------------------------------------------------------
 Version: 2.0.1
 Date: 27. 02. 2019
-  Changes:
+  Bugfixes:
     - Fix peaceful mode being turned off way too soon
 ---------------------------------------------------------------------------------------------------
 Version: 2.0.0
