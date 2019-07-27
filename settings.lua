@@ -93,18 +93,6 @@ data:extend{
         order = "pitch-z[Debug]-a"
     },
     {
-
-        --Desc: Scalar value for enemy health, must be greater than 0.
-        --Default: 1 (100%)
-        --Note: To make the enemies weaker, use a smaller value. To make them tougher, use a higher value.
-        type = "double-setting",
-        name = "pitch-EnemyHealthScale",
-        setting_type = "startup",
-        default_value = 2.75,
-        minimum_value = 0.0001,
-        order = "pitch-a[EnemyHealthScale]-a"
-    },
-    {
         --Desc: Scalar value for how much the enemy spawns, must be greater than 0.
         --Default: 1 (100%)
         --Note: To make the enemies easier, use a smaller value. To make them harder, use a higher value.
@@ -116,6 +104,34 @@ data:extend{
         default_value = 1,
         minimum_value = 0.0001,
         order = "pitch-a[EnemySwarmScale]-b"
+    },
+    {
+        type = "bool-setting",
+        name = "pitch-addResistances",
+        setting_type = "startup",
+        default_value = true,
+        order = "pitch-d[addResistances]-a"
+    },
+    {
+        type = "bool-setting",
+        name = "pitch-disableSmoke",
+        setting_type = "startup",
+        default_value = false,
+        order = "pitch-z[disableSmoke]-a"
+    }
+}
+if not mods["Rampant"] then
+data:extend{
+    {
+        --Desc: Scalar value for enemy health, must be greater than 0.
+        --Default: 1 (100%)
+        --Note: To make the enemies weaker, use a smaller value. To make them tougher, use a higher value.
+        type = "double-setting",
+        name = "pitch-EnemyHealthScale",
+        setting_type = "startup",
+        default_value = 2.75,
+        minimum_value = 0.0001,
+        order = "pitch-a[EnemyHealthScale]-a"
     },
     {
         type = "double-setting",
@@ -140,23 +156,9 @@ data:extend{
         default_value = 1,
         minimum_value = 0.0001,
         order = "pitch-c[EnemyMovementScale]-c"
-    },
-    {
-        type = "bool-setting",
-        name = "pitch-addResistances",
-        setting_type = "startup",
-        default_value = true,
-        order = "pitch-d[addResistances]-a"
-    },
-    {
-        type = "bool-setting",
-        name = "pitch-disableSmoke",
-        setting_type = "startup",
-        default_value = true,
-        order = "pitch-z[disableSmoke]-a"
     }
 }
-
+end
 local biters = {'small-biter', 'medium-biter', 'big-biter', 'behemoth-biter'}
 local spitters = {'small-spitter', 'medium-spitter', 'big-spitter', 'behemoth-spitter'}
 

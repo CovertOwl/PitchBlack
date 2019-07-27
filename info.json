@@ -1,9 +1,10 @@
 {
   "name": "Pitch_Black",
-  "version": "1.0.2",
+  "version": "2.0.2",
   "title": "Pitch Black",
   "author": "Reapa, Choumiko",  
   "homepage": "https://github.com/Choumiko/PitchBlack",
   "description": "Ever seen the movie \"Pitch Black\"? If you're having trouble surviving contact Vin_Diesel@PitchBlackSupport.com.\nLastly, keep an eye on warning messages and your pollution output.\nUpdated and maintained by me (Choumiko) until Reapa reappears",
-  "factorio_version": "0.16"
+  "factorio_version": "0.17",
+  "dependencies": ["(?) Rampant"]
 }
