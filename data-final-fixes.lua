@@ -13,17 +13,27 @@
 --end
 --log(serpent.block(data.raw.projectile["acid-projectile-purple"].action.action_delivery.target_effects[3]))
 --log(serpent.block(data.raw.wall["stone-wall"].resistances))
-local EnemyHealthScale = settings.startup["pitch-EnemyHealthScale"].value
-local EnemySwarmScale = settings.startup["pitch-EnemySwarmScale"].value
-local BiterDamageScale = settings.startup["pitch-BiterDamageScale"].value
-local SpitterDamageScale = settings.startup["pitch-SpitterDamageScale"].value
-local EnemyMovementScale = settings.startup["pitch-EnemyMovementScale"].value
+local EnemyHealthScale = 1
+local EnemySwarmScale =  1
+local BiterDamageScale = 1
+local SpitterDamageScale = 1
+local EnemyMovementScale = 1
+
+if not mods["Rampant"] then
+    EnemyHealthScale = settings.startup["pitch-EnemyHealthScale"].value
+    EnemySwarmScale = 1.0 / settings.startup["pitch-EnemySwarmScale"].value
+    BiterDamageScale = settings.startup["pitch-BiterDamageScale"].value
+    SpitterDamageScale = settings.startup["pitch-SpitterDamageScale"].value
+    EnemyMovementScale = settings.startup["pitch-EnemyMovementScale"].value
+end
 
 --Spawners spawn more and more frequently
 for _, prototype in pairs(data.raw["unit-spawner"]) do
-    prototype.max_count_of_owned_units = math.ceil(6 * EnemySwarmScale)
-    prototype.max_friends_around_to_spawn = math.ceil(8 * EnemySwarmScale)
+    prototype.max_count_of_owned_units = math.ceil(7 * EnemySwarmScale)
+    prototype.max_friends_around_to_spawn = math.ceil(5 * EnemySwarmScale)
 end
+
+
 
 local biters = {'small-biter', 'medium-biter', 'big-biter', 'behemoth-biter'}
 local spitters = {'small-spitter', 'medium-spitter', 'big-spitter', 'behemoth-spitter'}
@@ -36,52 +46,42 @@ for _, name in pairs(spitters) do
     resistances[name] = settings.startup["pitch-" .. name .. "-resistance"].value
 end
 
---Biters have more HP and join the attack more rapidly if you're polluting too much
-data.raw["unit"]["small-biter"].pollution_to_join_attack = math.ceil(133 * (1.0 / EnemySwarmScale))         --Default 200
-data.raw["unit"]["small-biter"].max_health = math.ceil(10 * EnemyHealthScale)                               --Default 15
-data.raw["unit"]["medium-biter"].pollution_to_join_attack = math.ceil(666 * (1.0 / EnemySwarmScale))            --Default 1000
-data.raw["unit"]["medium-biter"].max_health = math.ceil(50 * EnemyHealthScale)                              --Default 75
-data.raw["unit"]["big-biter"].pollution_to_join_attack = math.ceil(2666 * (1.0 / EnemySwarmScale))          --Default 4000
-data.raw["unit"]["big-biter"].max_health = math.ceil(500 * EnemyHealthScale)                                    --Default 375
-data.raw["unit"]["behemoth-biter"].pollution_to_join_attack = math.ceil(6650 * (1.0 / EnemySwarmScale))     --Default 20000
-data.raw["unit"]["behemoth-biter"].max_health = math.ceil(2500 * EnemyHealthScale)                          --Default 3000
-data.raw["unit"]["small-spitter"].pollution_to_join_attack = math.ceil(133 * (1.0 / EnemySwarmScale))       --Default 200
-data.raw["unit"]["small-spitter"].max_health = math.ceil(8 * EnemyHealthScale)                              --Default 10
-data.raw["unit"]["medium-spitter"].pollution_to_join_attack = math.ceil(665 * (1.0 / EnemySwarmScale))      --Default 600
-data.raw["unit"]["medium-spitter"].max_health = math.ceil(37 * EnemyHealthScale)                                --Default 50
-data.raw["unit"]["big-spitter"].pollution_to_join_attack = math.ceil(2666 * (1.0 / EnemySwarmScale))            --Default 1500
-data.raw["unit"]["big-spitter"].max_health = math.ceil(375 * EnemyHealthScale)                              --Default 200
-data.raw["unit"]["behemoth-spitter"].pollution_to_join_attack = math.ceil(6650 * (1.0 / EnemySwarmScale))   --Default 10000
-data.raw["unit"]["behemoth-spitter"].max_health = math.ceil(2000 * EnemyHealthScale)                            --Default 2000
-
-for _, name in pairs(biters) do
-    data.raw["unit"][name].attack_parameters.ammo_type.action.action_delivery.target_effects.damage.amount =
-        math.ceil(data.raw["unit"][name].attack_parameters.ammo_type.action.action_delivery.target_effects.damage.amount * BiterDamageScale)
-    data.raw["unit"][name].movement_speed = data.raw["unit"][name].movement_speed * EnemyMovementScale
-    data.raw["unit"][name].distance_per_frame = data.raw["unit"][name].distance_per_frame * EnemyMovementScale
-    if settings.startup["pitch-addResistances"].value then
-        if not data.raw["unit"][name].resistances then
-            data.raw["unit"][name].resistances = {}
+for name, unit in pairs(data.raw["unit"]) do
+    if string.find(name, "biter") then
+        unit.pollution_to_join_attack = math.ceil(unit.pollution_to_join_attack * EnemySwarmScale)
+        unit.max_health = math.ceil(unit.max_health * EnemyHealthScale)
+        if unit.attack_parameters.ammo_type.action.action_delivery then
+            unit.attack_parameters.ammo_type.action.action_delivery.target_effects.damage.amount =
+                math.ceil(unit.attack_parameters.ammo_type.action.action_delivery.target_effects.damage.amount * BiterDamageScale)
+        elseif unit.attack_parameters.ammo_type.action[1] then
+            for _, action in pairs(unit.attack_parameters.ammo_type.action) do
+                action.action_delivery.target_effects.damage.amount = math.ceil(action.action_delivery.target_effects.damage.amount * BiterDamageScale)
+            end
         end
-        table.insert(data.raw["unit"][name].resistances, {type = "fire", percent = resistances[name]})
+        unit.movement_speed = unit.movement_speed * EnemyMovementScale
+        unit.distance_per_frame = unit.distance_per_frame * EnemyMovementScale
+        if settings.startup["pitch-addResistances"].value and resistances[name] then
+            if not unit.resistances then
+                unit.resistances = {}
+            end
+            table.insert(unit.resistances, {type = "fire", percent = resistances[name]})
+        end
     end
 end
 
-log("Pitch Black adjusting spitters")
-for _, name in pairs(spitters) do
-    log(name .. ':')
-    log('Original modifier: ' .. serpent.line(data.raw["unit"][name].attack_parameters.damage_modifier))
-    data.raw["unit"][name].attack_parameters.damage_modifier = data.raw["unit"][name].attack_parameters.damage_modifier or 1
-    data.raw["unit"][name].attack_parameters.damage_modifier =
-        math.ceil(data.raw["unit"][name].attack_parameters.damage_modifier * SpitterDamageScale)
-    log('New modifier: ' .. serpent.line(data.raw["unit"][name].attack_parameters.damage_modifier))
-    data.raw["unit"][name].movement_speed = data.raw["unit"][name].movement_speed * EnemyMovementScale
-    data.raw["unit"][name].distance_per_frame = data.raw["unit"][name].distance_per_frame * EnemyMovementScale
-    if settings.startup["pitch-addResistances"].value then
-        if not data.raw["unit"][name].resistances then
-            data.raw["unit"][name].resistances = {}
+for name, unit in pairs(data.raw["unit"]) do
+    if string.find(name, "spitter") then
+        unit.attack_parameters.damage_modifier = unit.attack_parameters.damage_modifier or 1
+        unit.attack_parameters.damage_modifier =
+            math.ceil(unit.attack_parameters.damage_modifier * SpitterDamageScale)
+        unit.movement_speed = unit.movement_speed * EnemyMovementScale
+        unit.distance_per_frame = unit.distance_per_frame * EnemyMovementScale
+        if settings.startup["pitch-addResistances"].value and resistances[name] then
+            if not unit.resistances then
+                unit.resistances = {}
+            end
+            table.insert(unit.resistances, {type = "fire", percent = resistances[name]})
         end
-        table.insert(data.raw["unit"][name].resistances, {type = "fire", percent = resistances[name]})
     end
 end
 
