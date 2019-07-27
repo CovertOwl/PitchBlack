@@ -1,0 +1,28 @@
+---------------------------------------------------------------------------------------------------
+Version: 2.0.2
+Date: 19. 04. 2019
+  Changes:
+    - Disabled some settings when Rampant mod is active
+  Bugfixes:
+    - Fixed startup error with Rampant
+---------------------------------------------------------------------------------------------------
+Version: 2.0.1
+Date: 27. 02. 2019
+  Bugfixes:
+    - Fix peaceful mode being turned off way too soon
+---------------------------------------------------------------------------------------------------
+Version: 2.0.0
+Date: 27. 02. 2019
+  Changes:
+    - Updated for Factorio 0.17
+    - Activates peaceful mode for the first 90% of the first day
+---------------------------------------------------------------------------------------------------
+Version: 1.0.1
+Date: 13. 01. 2018
+  Bugfixes:
+    - Fixed nil error when loading Factorio with modified spitters
+---------------------------------------------------------------------------------------------------
+Version: 1.0.0
+Date: 06. 01. 2018
+  Changes:
+    - Updated for Factorio 0.16

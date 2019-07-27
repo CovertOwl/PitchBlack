@@ -1,17 +1,15 @@
 require 'Libs/Utility/math'
 require 'Libs/Utility/logger'
 
-function MessageAll(s)
-	LogDebug('Messaging all: ' .. s)
-
-	for _, player in pairs(game.players) do
-		if player.connected then
-			player.print(s)
-		end
-	end
+function MessageAll(s) --luacheck: allow defined top
+	LogInfo('Messaging all: ' .. s)
+	game.print(s)
+	if remote.interfaces.ChatToFile and remote.interfaces.ChatToFile.chat then --luacheck: ignore
+        remote.call("ChatToFile", "chat", s)
+    end
 end
 
-function DeepCopy(orig)
+function DeepCopy(orig) --luacheck: allow defined top
     local orig_type = type(orig)
     local copy
     if orig_type == 'table' then
@@ -25,7 +23,11 @@ function DeepCopy(orig)
     return copy
 end
 
-function SetBrightness(scalar)
+function SetBrightness(scalar) --luacheck: allow defined top
 	--Lerp between day (0.5 = noon) and night (0.0 = midnight)
 	game.surfaces.nauvis.daytime = Math.Lerp(0.42, 0.25, scalar)
+end
+
+function GetBrightness()
+	return 1.0 - ((game.surfaces.nauvis.daytime - 0.25) / (0.42 - 0.25))
 end
