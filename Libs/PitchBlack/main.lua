@@ -34,7 +34,8 @@ DefaultGlobalData = { --luacheck: allow defined top
 	CurrentState = nil,  
   
 	AllPollutionHarmables = nil,
-	AllPollutionHarmablesIter = 1
+	AllPollutionHarmablesIter = 1,
+	AllPollutionHarmablesLastHarmed = false
 }
 
 Main = 
@@ -78,6 +79,12 @@ function Main.On_Tick(_)
 	}
   
 	if (brightnessScale > 0.1) then
+		if global.Data.AllPollutionHarmablesLastHarmed ~= true then
+			for i,biterHarmableIter in ipairs(global.Data.AllPollutionHarmables) do  
+				biterHarmableIter.LastTick = global.Data.TotalElapsedTicks
+			  end
+		end
+	
 		local iterCount = 0
 		while true do
 			if (iterCount > 99) then 
@@ -95,7 +102,6 @@ function Main.On_Tick(_)
 				pollutionHarmable.LastTick = global.Data.TotalElapsedTicks
 				
 				if (pollutionHarmable.Harmable.valid) then
-					LogDebug('Polluting: ' .. global.Data.AllPollutionHarmablesIter);
 				
 					local pollution = game.surfaces.nauvis.get_pollution(pollutionHarmable.Harmable.position)
 					local pollutionClamped = Math.Clamp(pollution, 0, maxPollutionPerSecond - 1)
@@ -104,7 +110,8 @@ function Main.On_Tick(_)
 					local minScale = 0
 					local polScale = 0
 					
-					if (pollution > 0) then				
+					if (pollution > 0) then
+						LogDebug('Polluting: ' .. global.Data.AllPollutionHarmablesIter);	
 						for _,pollutionDamageScale in ipairs(pollutionDamageScales) do
 							if (pollutionClamped >= pollutionDamageScale.Max) then
 								minPol = pollutionDamageScale.Max
@@ -148,6 +155,10 @@ function Main.On_Tick(_)
 				global.Data.AllPollutionHarmablesIter = 1
 			end
 		end
+		
+		global.Data.AllPollutionHarmablesLastHarmed = true	
+	else		
+		global.Data.AllPollutionHarmablesLastHarmed = false		
 	end
 end
 
@@ -223,5 +234,18 @@ function Main.On_BiterBuild(_, event)
 			Harmable = base
 		}
 		return
+	end
+end
+
+function Main.On_ChunkGenerated(_, event)
+	local area = event.area 
+	local surface = event.surface
+	local biterHarmables = surface.find_entities_filtered{type= "unit-spawner", area= area}
+	
+	for i,biterHarmableIter in ipairs(biterHarmables) do  
+		global.Data.AllPollutionHarmables[#global.Data.AllPollutionHarmables + 1] = {
+			LastTick = -1,
+			Harmable = biterHarmableIter
+		}
 	end
 end

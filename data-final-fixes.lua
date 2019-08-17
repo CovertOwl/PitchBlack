@@ -21,7 +21,7 @@ local EnemyMovementScale = 1
 
 if not mods["Rampant"] then
     EnemyHealthScale = settings.startup["pitch-EnemyHealthScale"].value
-    EnemySwarmScale = 1.0 / settings.startup["pitch-EnemySwarmScale"].value
+    EnemySwarmScale = settings.startup["pitch-EnemySwarmScale"].value
     BiterDamageScale = settings.startup["pitch-BiterDamageScale"].value
     SpitterDamageScale = settings.startup["pitch-SpitterDamageScale"].value
     EnemyMovementScale = settings.startup["pitch-EnemyMovementScale"].value
@@ -48,14 +48,19 @@ end
 
 for name, unit in pairs(data.raw["unit"]) do
     if string.find(name, "biter") then
-        unit.pollution_to_join_attack = math.ceil(unit.pollution_to_join_attack * EnemySwarmScale)
+        unit.pollution_to_join_attack = math.ceil(unit.pollution_to_join_attack * (1 / EnemySwarmScale))
         unit.max_health = math.ceil(unit.max_health * EnemyHealthScale)
         if unit.attack_parameters.ammo_type.action.action_delivery then
-            unit.attack_parameters.ammo_type.action.action_delivery.target_effects.damage.amount =
-                math.ceil(unit.attack_parameters.ammo_type.action.action_delivery.target_effects.damage.amount * BiterDamageScale)
+			if unit.attack_parameters.ammo_type.action.action_delivery.target_effects
+			and unit.attack_parameters.ammo_type.action.action_delivery.target_effects.damage then				
+				unit.attack_parameters.ammo_type.action.action_delivery.target_effects.damage.amount =
+					math.ceil(unit.attack_parameters.ammo_type.action.action_delivery.target_effects.damage.amount * BiterDamageScale)
+			end
         elseif unit.attack_parameters.ammo_type.action[1] then
             for _, action in pairs(unit.attack_parameters.ammo_type.action) do
-                action.action_delivery.target_effects.damage.amount = math.ceil(action.action_delivery.target_effects.damage.amount * BiterDamageScale)
+				if action.action_delivery.target_effects.damage then
+					action.action_delivery.target_effects.damage.amount = math.ceil(action.action_delivery.target_effects.damage.amount * BiterDamageScale)
+				end
             end
         end
         unit.movement_speed = unit.movement_speed * EnemyMovementScale

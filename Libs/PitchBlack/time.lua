@@ -173,6 +173,8 @@ function Time.Init(self, globalState)
   end
 
   LogInfo('Starting with Time - ' .. globalState.CycleState.Name)
+  
+  SetBrightness(globalState.CycleState.Brightness)
 
   LogDebug('Exit Time.Init()')
 end

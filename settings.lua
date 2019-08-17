@@ -2,22 +2,22 @@ data:extend{
 	{
         --Desc: Max evolution value
         --Default: 100 (100%)
-        type = "int-setting",
+        type = "double-setting",
         name = "pitch-MaxEvolution",
         setting_type = "runtime-global",
-        default_value = 100,
-        minimum_value = 0,
+        default_value = 1.0,
+        minimum_value = 0.0,
+        maximum_value = 1.0,
         order = "pitch-a[MaxEvolution]-a"
     },
 	{
         --Desc: Biter expansion scale
         --Default: 100 (100%)
-        type = "int-setting",
+        type = "double-setting",
         name = "pitch-ExpansionScale",
         setting_type = "runtime-global",
-        default_value = 100,
-        minimum_value = 0,
-        maximum_value = 100,
+        default_value = 1.0,
+        minimum_value = 0.01,
         order = "pitch-a[ExpansionScale]-a"
     },
 	{
@@ -28,7 +28,6 @@ data:extend{
         setting_type = "runtime-global",
         default_value = 1.0,
         minimum_value = 0.0,
-        maximum_value = 1.0,
         order = "pitch-a[ScalePollutionDamage]-a"
     },
     {

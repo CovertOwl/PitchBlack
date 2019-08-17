@@ -41,6 +41,11 @@ Biters.DefaultState =
       Messages = nil
     }
   }
+  
+Biters.Apply = 
+  {
+    PermanentEvolution = nil
+  }
 
 Biters.Phases =
   {
@@ -1220,6 +1225,13 @@ function Biters.Tick(self, currentState, previousState)
   local currentPhaseState = currentBiterState.CurrentPhaseState
   --local currentPhaseConfig = currentPhaseState.CurrentPhase
   local currentPhaseVarData = currentPhaseState.CurrentPhaseVarData
+  
+  if Biters.Apply.PermanentEvolution ~= nil then
+    currentBiterState.PermanentEvolution = Biters.Apply.PermanentEvolution
+	Biters.Apply.PermanentEvolution = nil
+	
+	MessageAll('Updated biter Permanent Evolution')
+  end
 
   LogDebug('Permanent Evolution: ' .. currentBiterState.PermanentEvolution .. ', TempNightEvolution: ' .. currentBiterState.TempNightEvolution .. ', Phase: ' .. currentPhaseVarData.Name)
 
@@ -1326,9 +1338,6 @@ function Biters.StartNewPhase(self, currentState, previousState)
   --game.map_settings.enemy_evolution.time_factor = newMapSettings.enemy_evolution.time_factor
   local scale = settings.global["pitch-ScaleEvolutionRate"].value
   local expansionScale = settings.global["pitch-ExpansionScale"].value
-  if expansionScale > 0 then
-	expansionScale = 100 / expansionScale
-  end
   
   game.map_settings.enemy_evolution.destroy_factor = newMapSettings.enemy_evolution.destroy_factor * scale
   game.map_settings.enemy_evolution.pollution_factor = newMapSettings.enemy_evolution.pollution_factor * scale
@@ -1437,7 +1446,7 @@ function Biters.UpdateEvolution(_, currentState, _, _)
   local currentBiterPhaseVarData = currentBiterPhaseState.CurrentPhaseVarData
 
   local scaleEvolutionRate =  settings.global["pitch-ScaleEvolutionRate"].value
-  local maxEvolution = settings.global["pitch-MaxEvolution"].value * 0.01
+  local maxEvolution = settings.global["pitch-MaxEvolution"].value
 
   local permamnentEvolutionRate = 0.0
 
@@ -1721,4 +1730,8 @@ function Biters.CanPhaseBreak(_, biterState, _, biterPhaseVarData, currentState,
   LogDebug('Exit Biters.CanPhaseBreak(' .. biterPhaseVarData.Name .. ') with ' .. tostring(canBreak))
 
   return canBreak
+end
+
+function Biters.SetBiterPermanentEvolution(permanentEvolution)
+	Biters.Apply.PermanentEvolution = permanentEvolution
 end

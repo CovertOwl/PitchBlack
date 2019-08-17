@@ -63,6 +63,12 @@ script.on_event(defines.events.on_biter_base_built,
 	end
 )
 
+script.on_event(defines.events.on_chunk_generated, 
+	function(event)
+		Main:On_ChunkGenerated(event)
+	end
+)
+
 script.on_event(defines.events.on_runtime_mod_setting_changed, function(event)
     local _, err = pcall(function()
         if event.setting == "pitch-DebugMode" then
@@ -114,5 +120,10 @@ remote.add_interface("PitchBlack",
 	SkipTimePhase = 
 	function() 
 		Time.SkipPhase()
+	end,
+	
+	SetBiterPermanentEvolution = 
+	function(evolution) 
+		Biters.SetBiterPermanentEvolution(evolution)
 	end
 })
